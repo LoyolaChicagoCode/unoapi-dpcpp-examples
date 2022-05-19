@@ -8,8 +8,8 @@ A number of example programs for the [UnoAPI](https://unoapi.cs.luc.edu) curricu
 
 All examples are intended to follow current practices, such as
 
-- CMake
-- modern C++ syntax (currently C++17 for best compatibility and stability)
+- [CMake](https://cmake.org)
+- [modern C++ syntax](http://isocpp.github.io) (currently C++17 for best compatibility and stability)
 - [GoogleTest](https://google.github.io/googletest)
 - [CLI11](https://github.com/CLIUtils/CLI11) command-line option parser
 - [spdlog](https://spdlog.docsforge.com) logging library
