@@ -48,7 +48,7 @@ jobs:
       run: cmake --build $BUILD_DIR
 
     - name: CMake test
-      working-directory: $BUILD_DIR
+      working-directory: ${{github.workspace}}/$BUILD_DIR
       run: |
         ./bin/integration
         ./bin/matrix_mul
