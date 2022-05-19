@@ -1,0 +1,111 @@
+*.app
+#
+# .hgignore - Mercurial ignore list
+#
+# written by Jason Robert Carey Patterson <jason@lighterra.com>
+#
+
+# use UNIX shell syntax
+
+# version control systems
+CVS
+.svn
+.git
+.hg
+
+# text editor extras
+*.swp
+*~
+.\#*
+*.bak
+tags
+TAGS
+
+# compiled object code & bytecode
+*.o
+*.obj
+*.exe
+*.a
+*.lib
+*.so
+*.so.*
+*.dll
+*.dylib
+*.framework
+*.class
+*.jar
+*.pyc
+*.pyo
+
+# debugging files
+core
+*.sym
+*.SYM
+*.dSYM
+*.xSYM
+
+# yacc/lex output files
+*.tab.c
+*.tab.C
+*.tab.cc
+*.tab.cpp
+*.tab.c++
+*.tab.cxx
+*.yy.c
+*.yy.C
+*.yy.cc
+*.yy.cpp
+*.yy.c++
+*.yy.cxx
+
+# Visual Studio & Windows
+obj
+bin
+Debug
+Release
+x64
+BuildLog.*
+*.aps
+*.clw
+*.idb
+*.ilk
+*.meta
+*.ncb
+*.nlb
+*.pdb
+*.pgc
+*.pgd
+*.rsp
+*.sln
+*.suo
+*.tlb
+*.tlh
+*.tli
+*.tmp
+*.user
+Thumbs.db
+
+# Xcode & Mac OS X
+build
+xcuserdata
+*.mode1
+*.mode1v3
+*.mode2v3
+*.pbxuser
+*.perspective
+*.perspectivev3
+*.xcworkspace
+.DS_Store
+
+# CLion
+.idea
+
+# CMake
+Makefile
+CMakeFiles
+CMakeCache.txt
+*.cmake
+cmake-build-*
+
+processtree-*
+\#*

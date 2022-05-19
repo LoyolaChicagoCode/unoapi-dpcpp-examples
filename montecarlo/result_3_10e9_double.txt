@@ -1,0 +1,10 @@
+[2022-04-30 17:31:15.681] [info] 3 players are going to throw 1000000000 darts each
+[2022-04-30 17:31:15.681] [info] using minstd engine with real distribution
+[2022-04-30 17:31:15.681] [info] randomization is on
+[2022-04-30 17:31:15.858] [info] Device: Intel(R) Core(TM) i7-7500U CPU @ 2.70GHz
+[2022-04-30 17:31:16.321] [info] done submitting to queue...waiting for results
+[2022-04-30 17:31:25.199] [info] result[0] = 785392452
+[2022-04-30 17:31:25.199] [info] result[1] = 785404677
+[2022-04-30 17:31:25.199] [info] result[2] = 785392455
+[2022-04-30 17:31:25.199] [info] sum = 2356189584
+pi = 3.141586112

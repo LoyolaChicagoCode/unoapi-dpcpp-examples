@@ -1,0 +1,35 @@
+[2022-04-30 16:04:30.392] [info] 3 players are going to throw 1000000000 darts each
+[2022-04-30 16:04:30.392] [info] randomization is on
+[2022-04-30 16:04:30.392] [info] using ranlux engine
+[2022-04-30 16:04:30.553] [info] Device: Intel(R) Core(TM) i7-7500U CPU @ 2.70GHz
+[2022-04-30 16:04:31.051] [info] done submitting to queue...waiting for results
+[2022-04-30 16:28:34.053] [info] result[0] = 785407269
+[2022-04-30 16:28:34.053] [info] result[1] = 785399614
+[2022-04-30 16:28:34.053] [info] result[2] = 785407269
+[2022-04-30 16:28:34.053] [info] sum = 2356214152
+pi = 3.141618869333333
+[2022-04-30 16:28:34.070] [info] 3 players are going to throw 1000000000 darts each
+[2022-04-30 16:28:34.070] [info] randomization is on
+[2022-04-30 16:28:34.070] [info] using ranlux engine
+[2022-04-30 16:28:34.208] [info] Device: Intel(R) Core(TM) i7-7500U CPU @ 2.70GHz
+[2022-04-30 16:28:34.656] [info] done submitting to queue...waiting for results
+[2022-04-30 16:52:52.741] [info] result[0] = 785351901
+[2022-04-30 16:52:52.741] [info] result[1] = 785369998
+[2022-04-30 16:52:52.741] [info] result[2] = 785351901
+[2022-04-30 16:52:52.741] [info] sum = 2356073800
+pi = 3.1414317333333335
+[2022-04-30 16:52:52.764] [info] 3 players are going to throw 1000000000 darts each
+[2022-04-30 16:52:52.764] [info] randomization is on
+[2022-04-30 16:52:52.764] [info] using ranlux engine
+[2022-04-30 16:52:52.904] [info] Device: Intel(R) Core(TM) i7-7500U CPU @ 2.70GHz
+[2022-04-30 16:52:53.349] [info] done submitting to queue...waiting for results
+[2022-04-30 17:51:46.745] [info] 3 players are going to throw 1000000000 darts each
+[2022-04-30 17:51:46.745] [info] using ranlux engine with real distribution
+[2022-04-30 17:51:46.745] [info] randomization is on
+[2022-04-30 17:51:46.917] [info] Device: Intel(R) Core(TM) i7-7500U CPU @ 2.70GHz
+[2022-04-30 17:51:47.595] [info] done submitting to queue...waiting for results
+[2022-04-30 18:04:36.497] [info] result[0] = 785394847
+[2022-04-30 18:04:36.497] [info] result[1] = 785387640
+[2022-04-30 18:04:36.497] [info] result[2] = 785394842
+[2022-04-30 18:04:36.497] [info] sum = 2356177329
+pi = 3.141569772

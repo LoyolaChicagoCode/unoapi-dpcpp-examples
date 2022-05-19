@@ -1,0 +1,56 @@
+
+name: OneAPI CI with CMake
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+
+  linux-intel-oneapi:
+    runs-on: ubuntu-latest
+    env:
+      CC: icx
+      CXX: dpcpp
+      BUILD_DIR: cmake-build-debug
+      MAIN: integration
+
+    steps:
+    - name: Intel Apt repository
+      timeout-minutes: 1
+      run: |
+        wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+        sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+        rm GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+        echo "deb https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
+        sudo apt update
+        
+    - name: Install Intel oneAPI
+      timeout-minutes: 5
+      run: |
+        sudo apt install intel-oneapi-compiler-dpcpp-cpp
+
+    - name: Checkout project code
+      uses: actions/checkout@v2
+
+    - name: Set oneAPI environment
+      run: |
+        source /opt/intel/oneapi/setvars.sh
+        printenv >> $GITHUB_ENV
+        echo /opt/intel/oneapi/compiler/latest/linux/bin >> $GITHUB_PATH
+
+    - name: CMake configure
+      run: cmake -DCMAKE_BUILD_TYPE=Debug -S . -B $BUILD_DIR
+
+    - name: CMake build
+      run: cmake --build $BUILD_DIR
+
+    - name: CMake test
+      working-directory: $BUILD_DIR
+      run: |
+        ./bin/integration
+        ./bin/matrix_mul
+        ./bin/montecarlo
+        

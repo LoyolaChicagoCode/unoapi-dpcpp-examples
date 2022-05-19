@@ -1,0 +1,21 @@
+❯ ./cmake-build-release-dpc/bin/montecarlo -p 3 -n 100000000 -r -l
+[2022-04-30 15:59:22.765] [info] 3 players are going to throw 100000000 darts each
+[2022-04-30 15:59:22.765] [info] randomization is on
+[2022-04-30 15:59:22.765] [info] using ranlux engine
+[2022-04-30 15:59:22.904] [info] Device: Intel(R) Core(TM) i7-7500U CPU @ 2.70GHz
+[2022-04-30 15:59:23.351] [info] done submitting to queue...waiting for results
+[2022-04-30 16:01:48.187] [info] result[0] = 78536101
+[2022-04-30 16:01:48.187] [info] result[1] = 78540638
+[2022-04-30 16:01:48.187] [info] result[2] = 78536102
+[2022-04-30 16:01:48.187] [info] sum = 235612841
+pi = 3.1415045466666665
+[2022-04-30 17:45:21.926] [info] 3 players are going to throw 100000000 darts each
+[2022-04-30 17:45:21.928] [info] using ranlux engine with real distribution
+[2022-04-30 17:45:21.928] [info] randomization is on
+[2022-04-30 17:45:22.105] [info] Device: Intel(R) Core(TM) i7-7500U CPU @ 2.70GHz
+[2022-04-30 17:45:22.626] [info] done submitting to queue...waiting for results
+[2022-04-30 17:46:37.886] [info] result[0] = 78536160
+[2022-04-30 17:46:37.886] [info] result[1] = 78539063
+[2022-04-30 17:46:37.886] [info] result[2] = 78536154
+[2022-04-30 17:46:37.886] [info] sum = 235611377
+pi = 3.1414850266666665

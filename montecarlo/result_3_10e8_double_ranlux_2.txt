@@ -1,0 +1,10 @@
+[2022-04-30 17:25:31.219] [info] 3 players are going to throw 100000000 darts each
+[2022-04-30 17:25:31.219] [info] using ranlux engine with real distribution
+[2022-04-30 17:25:31.219] [info] randomization is on
+[2022-04-30 17:25:31.422] [info] Device: Intel(R) Core(TM) i7-7500U CPU @ 2.70GHz
+[2022-04-30 17:25:31.959] [info] done submitting to queue...waiting for results
+[2022-04-30 17:27:03.596] [info] result[0] = 78542001
+[2022-04-30 17:27:03.596] [info] result[1] = 78547469
+[2022-04-30 17:27:03.596] [info] result[2] = 78542001
+[2022-04-30 17:27:03.596] [info] sum = 235631471
+pi = 3.1417529466666667
