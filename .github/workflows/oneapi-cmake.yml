@@ -15,7 +15,6 @@ jobs:
       CC: icx
       CXX: dpcpp
       BUILD_DIR: cmake-build-debug
-      MAIN: integration
 
     steps:
     - name: Intel Apt repository
