@@ -1,6 +1,5 @@
 #include <chrono>
 #include <cmath>
-#include <limits>
 
 #include <CLI/CLI.hpp>
 #include <fmt/format.h>
