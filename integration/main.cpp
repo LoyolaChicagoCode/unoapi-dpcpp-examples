@@ -13,6 +13,8 @@
 
 double f(const double x);
 
+double trapezoid(const double f1, const double f2, const double dx);
+
 int main(const int argc, const char *const argv[]) {
     constexpr size_t DEFAULT_NUMBER_OF_TRAPEZOIDS{1};
     size_t number_of_trapezoids{DEFAULT_NUMBER_OF_TRAPEZOIDS};
@@ -54,7 +56,7 @@ int main(const int argc, const char *const argv[]) {
             //   = (x_min * number_of_trapezoids + index * (x_max - x_min)) / number_of_trapezoids
             const auto x = (x_min * (number_of_trapezoids - index) + x_max * index) / number_of_trapezoids;
             values[index] = f(x);
-            result += (values[index - 1] + values[index]) * half_dx;
+            result += trapezoid(values[index - 1], values[index], half_dx);
         }
     } else {
         spdlog::info("preparing for vectorized integration");
@@ -69,6 +71,7 @@ int main(const int argc, const char *const argv[]) {
             const auto v{v_buf.get_access<sycl::access_mode::write>(h)};
 
             h.parallel_for(size, [=](const auto index) {
+		// see above for the rationale for this computation of x
                 const double x = (x_min * (number_of_trapezoids - index) + x_max * index) / number_of_trapezoids;
                 v[index] = f(x);
             });
@@ -79,8 +82,7 @@ int main(const int argc, const char *const argv[]) {
             const auto sum_reduction{sycl::reduction(r_buf, h, sycl::plus<>())};
 
             h.parallel_for(sycl::range<1>{number_of_trapezoids}, sum_reduction, [=](const auto index, auto &sum) {
-                // TODO inline comment to explain formula
-                sum.combine((v[index + 1] + v[index]) * half_dx);
+                sum.combine(trapezoid(v[index], v[index + 1], half_dx));
             });
         });
 
@@ -101,4 +103,8 @@ int main(const int argc, const char *const argv[]) {
 
 double f(const double x) {
     return cos(x) * cos(x) + sin(x) * sin(x);
+}
+
+double trapezoid(const double f1, const double f2, const double half_dx) {
+  return (f1 + f2) * half_dx;
 }
