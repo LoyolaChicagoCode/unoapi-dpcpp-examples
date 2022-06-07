@@ -51,3 +51,5 @@ jobs:
         $BUILD_DIR/bin/integration
         $BUILD_DIR/bin/matrix_mul_dpc
         $BUILD_DIR/bin/montecarlo
+	# eventually keep only this loop for discovering all tests
+        for test_bin in bin/*tests; do "./$test_bin"; done
