@@ -11,9 +11,9 @@
 #include <CL/sycl.hpp>
 #include <dpc_common.hpp>
 
-double f(const double x);
+#include "trapezoid.h"
 
-double trapezoid(const double f1, const double f2, const double dx);
+double f(const double x);
 
 int main(const int argc, const char *const argv[]) {
     constexpr size_t DEFAULT_NUMBER_OF_TRAPEZOIDS{1};
@@ -103,8 +103,4 @@ int main(const int argc, const char *const argv[]) {
 
 double f(const double x) {
     return cos(x) * cos(x) + sin(x) * sin(x);
-}
-
-double trapezoid(const double f1, const double f2, const double half_dx) {
-  return (f1 + f2) * half_dx;
 }
