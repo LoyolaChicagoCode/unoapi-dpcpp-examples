@@ -3,6 +3,6 @@
 
 #include <CL/sycl.hpp>
 
-extern SYCL_EXTERNAL double trapezoid(const double f1, const double f2, const double dx);
+SYCL_EXTERNAL double trapezoid(const double f1, const double f2, const double dx);
 
 #endif // INTEGRATION_H_
