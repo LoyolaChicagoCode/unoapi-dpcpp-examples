@@ -15,5 +15,13 @@ protected:
 };
 
 TEST_F(IntegrationTest, Simple1) {
-    EXPECT_EQ(2, 2);
+    EXPECT_EQ(trapezoid(1, 1, 0.5), 1);
+}
+
+TEST_F(IntegrationTest, Simple2) {
+    EXPECT_EQ(trapezoid(0, 1, 0.5), 0.5);
+}
+
+TEST_F(IntegrationTest, Simple3) {
+    EXPECT_EQ(trapezoid(-1, 1, 0.5), 0);
 }
