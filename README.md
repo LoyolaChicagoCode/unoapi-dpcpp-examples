@@ -23,6 +23,13 @@ Please report any issues with these code examples [here](https://github.com/Loyo
 
 # Debian-based Linux systems
 
+These instructions should work for physical and virtual Debian-based systems on Intel hardware.
+We have verified this on the following types of systems:
+
+- Dell XPS (2017) with Ubuntu 22.04
+- MacBook Air (2020) with MacOS 12.4 running an Ubuntu 22.04 guest in VMware Fusion
+- GitHub Actions workflow *ubuntu-latest* container
+
 ## One-time setup
 
 ```shell
