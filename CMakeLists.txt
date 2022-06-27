@@ -32,6 +32,13 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(spdlog)
 
 FetchContent_Declare(
+        scnlib
+        GIT_REPOSITORY https://github.com/eliaskosunen/scnlib.git
+        GIT_TAG        v0.4
+)
+FetchContent_MakeAvailable(scnlib)
+
+FetchContent_Declare(
         cli11
         GIT_REPOSITORY https://github.com/CLIUtils/CLI11.git
         GIT_TAG        v2.1.2
@@ -48,3 +55,4 @@ FetchContent_MakeAvailable(googletest)
 add_subdirectory(integration)
 add_subdirectory(matrix_mul)
 add_subdirectory(montecarlo)
+add_subdirectory(wordcloud)
