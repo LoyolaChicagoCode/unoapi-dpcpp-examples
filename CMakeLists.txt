@@ -34,7 +34,7 @@ FetchContent_MakeAvailable(spdlog)
 FetchContent_Declare(
         scnlib
         GIT_REPOSITORY https://github.com/eliaskosunen/scnlib.git
-        GIT_TAG        v0.4
+        GIT_TAG        v1.1.2
 )
 FetchContent_MakeAvailable(scnlib)
 
