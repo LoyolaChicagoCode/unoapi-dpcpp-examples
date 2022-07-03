@@ -1,11 +1,13 @@
 #include <algorithm>
 #include <chrono>
 #include <iostream>
+#include <set>
 #include <unordered_map>
+#include <utility>
+#include <cmath>
 
 #include <CLI/CLI.hpp>
 #include <fmt/format.h>
-#include <scn/scn.h>
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 
@@ -14,31 +16,49 @@
 #include <CL/sycl.hpp>
 #include <dpc_common.hpp>
 
-
 // idea:
 // read all words
 // group into uniformly sized buckets (except last one)
 // show number of resulting buckets
 // allow word cloud queries based on single buckets or contiguous range of buckets
 
+// TODO better size_t or unsigned long or just long?
 
-void record_frequencies(const std::vector<std::string>& source, const size_t left, const size_t right, std::unordered_map<std::string, size_t>& freq_map) {
-    fmt::print("l = {} r = {}\n", left, right);
+typedef std::vector<std::string> word_list;
+typedef std::unordered_map<std::string, size_t> frequency_map;
+typedef std::vector<std::string>::const_iterator word_iterator;
+
+// TODO better indices or iterators for subranges of vectors?
+
+void tally_frequencies(const word_list& source, const size_t left, const size_t right, frequency_map& freq_map) {
+    spdlog::info("{}..{}", left, right);
     for (auto index = left; index < right; index ++) {
-        const auto word = source.at(index);
+        const auto word = source[index];
         freq_map[word] ++;
     }
 }
 
-void print_frequencies(const std::unordered_map<std::string, size_t>& freq_map) {
-    for (auto kv = freq_map.begin(); kv != freq_map.end(); kv ++) {
+struct descending_by_value {
+    template <typename T> bool operator()(const T& l, const T& r) const {
+        if (l.second != r.second) {
+            return l.second > r.second;
+        }
+        return l.first < r.first;
+    }
+};
+
+void print_frequencies(const frequency_map& freq_map, const size_t how_many) {
+    std::set<std::pair<std::string, size_t>, descending_by_value> freq_set(freq_map.begin(), freq_map.end());
+    auto count = 0UL;
+    for (auto kv = freq_set.begin(); kv != freq_set.end(); kv ++) {
         fmt::print("{}: {} ", kv->first, kv->second);
+        if (++ count >= how_many) break;
     }
     fmt::print("\n");
 }
 
 int main(const int argc, const char *const argv[]) {
-    constexpr size_t DEFAULT_BUCKET_SIZE{3};
+    constexpr size_t DEFAULT_BUCKET_SIZE{5};
     constexpr size_t DEFAULT_TOP_N_WORDS{3};
     size_t bucket_size{DEFAULT_BUCKET_SIZE};
     size_t top_n_words{DEFAULT_TOP_N_WORDS};
@@ -53,21 +73,28 @@ int main(const int argc, const char *const argv[]) {
 
     // https://stackoverflow.com/questions/69797846/reading-words-from-a-file-into-dynamically-allocated-array
 
-    std::vector all(std::istream_iterator<std::string>(std::cin), {});
+    // TODO compare performance with loop not based on istream/cin
 
-    const auto size = all.size();
-    for (auto i = 0UL; i < size; i += bucket_size) {
-        const auto b = std::min(i + bucket_size, size);
-        fmt::print("{}..{}\n", i, b);
-        std::unordered_map<std::string, size_t> freq_table;
-        record_frequencies(all, i, i + b, freq_table);
-//        print_frequencies(freq_table);
+    word_list words(std::istream_iterator<std::string>(std::cin), {});
+    const auto size = words.size();
+    const auto num_of_buckets = ceil(1.0 * size / bucket_size);
+    std::vector buckets(num_of_buckets, frequency_map{});
+
+    spdlog::info("{} buckets", num_of_buckets);
+
+    for (auto idx = buckets.begin(); idx < buckets.end(); idx ++) {
+        const auto bucket_start = (idx - buckets.begin()) * bucket_size;
+        const auto bucket_end = std::min(bucket_start + bucket_size, size);
+        tally_frequencies(words, bucket_start, bucket_end, *idx);
     }
 
-    fmt::print("read {} words\n", all.size());
-    for (auto i = all.begin(); i != all.end(); i ++) {
-        fmt::print("{}: {} ", *i, i->length());
+    for (auto idx = buckets.begin(); idx < buckets.end(); idx ++) {
+        fmt::print("bucket {}: ", idx - buckets.begin());
+        print_frequencies(*idx, top_n_words);
     }
+
+//    std::ostream_iterator<std::string> out(std::cout, " ");
+//    std::copy(words.begin(), words.end(), out);
 
     return 0;
 }

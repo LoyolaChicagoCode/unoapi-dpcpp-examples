@@ -22,7 +22,7 @@
 // allow word cloud queries based on single buckets or contiguous range of buckets
 
 
-void record_frequencies(const std::vector<std::string>& source, const size_t left, const size_t right, std::unordered_map<std::string, size_t>& freq_map) {
+void tally_frequencies(const std::vector<std::string>& source, const size_t left, const size_t right, std::unordered_map<std::string, size_t>& freq_map) {
     fmt::print("l = {} r = {}\n", left, right);
     for (auto index = left; index < right; index ++) {
         const auto word = source.at(index);
@@ -60,7 +60,7 @@ int main(const int argc, const char *const argv[]) {
         const auto b = std::min(i + bucket_size, size);
         fmt::print("{}..{}\n", i, b);
         std::unordered_map<std::string, size_t> freq_table;
-        record_frequencies(all, i, i + b, freq_table);
+        tally_frequencies(all, i, i + b, freq_table);
 //        print_frequencies(freq_table);
     }
 
