@@ -1,5 +1,4 @@
 #include <chrono>
-#include <cmath>
 
 #include <CLI/CLI.hpp>
 #include <fmt/format.h>
@@ -13,10 +12,10 @@
 
 #include "trapezoid.h"
 
-double f(const double x);
+double f(double x);
 
 int main(const int argc, const char *const argv[]) {
-    constexpr size_t DEFAULT_NUMBER_OF_TRAPEZOIDS{1};
+    constexpr size_t DEFAULT_NUMBER_OF_TRAPEZOIDS{10};
     size_t number_of_trapezoids{DEFAULT_NUMBER_OF_TRAPEZOIDS};
     double x_min{0.0};
     double x_max{1.0};
@@ -43,7 +42,7 @@ int main(const int argc, const char *const argv[]) {
 
     spdlog::info("integrating function from {} to {} using {} trapezoid(s), dx = {}", x_min, x_max, number_of_trapezoids, dx);
 
-    std::vector<double> values(size, 0);
+    std::vector values(size, 0.0);
     double result{0};
 
     if (run_sequentially) {
@@ -61,36 +60,39 @@ int main(const int argc, const char *const argv[]) {
     } else {
         spdlog::info("preparing for vectorized integration");
 
-        sycl::queue q{sycl::default_selector{}, dpc_common::exception_handler};
+        // we use an in-order queue for this simple, sequential computation
+        sycl::queue q{sycl::default_selector{}, dpc_common::exception_handler, sycl::property::queue::in_order()};
         spdlog::info("Device: {}", q.get_device().get_info<sycl::info::device::name>());
 
-        sycl::buffer<double> v_buf{values.data(), sycl::range<1>(values.size())};
-        sycl::buffer<double> r_buf{&result, 1};
+        // the tabulated function values are needed only on the device
+        const auto v = sycl::malloc_device<double>(size, q);
+        // the result is a singleton array shared between the device and the host
+        const auto r = sycl::malloc_shared<double>(1, q);
 
-        q.submit([&](auto &h) {
-            const auto v{v_buf.get_access<sycl::access_mode::write>(h)};
-
-            h.parallel_for(size, [=](const auto index) {
-		// see above for the rationale for this computation of x
-                const double x = (x_min * (number_of_trapezoids - index) + x_max * index) / number_of_trapezoids;
-                v[index] = f(x);
-            });
+        q.parallel_for(sycl::range<1>(size), [=](const auto index) {
+            const double x = (x_min * (number_of_trapezoids - index) + x_max * index) / number_of_trapezoids;
+            v[index] = f(x);
         });
 
         q.submit([&](auto &h) {
-            const auto v{v_buf.get_access<sycl::access_mode::read>(h)};
-            const auto sum_reduction{sycl::reduction(r_buf, h, sycl::plus<>())};
-
+            const auto sum_reduction{sycl::reduction(r, sycl::plus<>())};
             h.parallel_for(sycl::range<1>{number_of_trapezoids}, sum_reduction, [=](const auto index, auto &sum) {
                 sum.combine(trapezoid(v[index], v[index + 1], half_dx));
             });
         });
 
         spdlog::info("done submitting to queue...waiting for results");
+
+        // we still have to wait for the result even though we have an in-order queue
+        q.wait();
+        result = r[0];
     }
     spdlog::info("results should be available now");
 
     if (show_function_values) {
+
+        // TODO explicitly copy from device
+
         for (auto i{0UL}; i < size; i++) {
             fmt::print("{}: f({}) = {}\n", i, x_min + i * dx, values[i]);
         }
