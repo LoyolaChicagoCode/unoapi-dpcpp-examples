@@ -86,6 +86,8 @@ int main(const int argc, const char *const argv[]) {
         // we still have to wait for the result even though we have an in-order queue
         q.wait();
         result = r[0];
+        free(v, q);
+        free(r, q);
     }
     spdlog::info("results should be available now");
 
