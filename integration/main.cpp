@@ -64,6 +64,8 @@ int main(const int argc, const char *const argv[]) {
         sycl::queue q{sycl::default_selector{}, dpc_common::exception_handler, sycl::property::queue::in_order()};
         spdlog::info("Device: {}", q.get_device().get_info<sycl::info::device::name>());
 
+        // important: buffer NOT backed by host-allocated vector
+        // this allows the data to live on the device until accessed on the host (if desired)
         sycl::buffer<double> v_buf{sycl::range<1>{size}};
         sycl::buffer<double> r_buf{&result, 1};
 
