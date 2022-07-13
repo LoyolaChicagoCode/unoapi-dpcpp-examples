@@ -13,7 +13,6 @@ template <class Indexable> void print_function_values(const Indexable & values, 
     for (auto i{0UL}; i < values.size(); i++) {
         fmt::print("{}: f({}) = {}\n", i, x_min + i * dx, values[i]);
     }
-    fmt::print("\n");
 }
 
 int main(const int argc, const char * const argv[]) {
@@ -104,7 +103,7 @@ int main(const int argc, const char * const argv[]) {
             print_function_values(values, x_min, dx);
         }
     }
-    spdlog::info("results should be available now");
+    spdlog::info("result should be available now");
 
     fmt::print("result = {}\n", result);
 
