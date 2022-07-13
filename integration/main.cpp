@@ -1,17 +1,20 @@
-#include <chrono>
-
 #include <CLI/CLI.hpp>
 #include <fmt/format.h>
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 
-// dpc_common.hpp can be found in the dev-utilities include folder.
-// e.g., $ONEAPI_ROOT/dev-utilities/<version>/include/dpc_common.hpp
 #include <CL/sycl.hpp>
 #include <dpc_common.hpp>
 
 #include "f.h"
 #include "trapezoid.h"
+
+template <class Indexable> void print_function_values(const Indexable & values, const double x_min, const double dx) {
+    for (auto i{0UL}; i < values.size(); i++) {
+        fmt::print("{}: f({}) = {}\n", i, x_min + i * dx, values[i]);
+    }
+    fmt::print("\n");
+}
 
 int main(const int argc, const char * const argv[]) {
     constexpr size_t DEFAULT_NUMBER_OF_TRAPEZOIDS{10};
@@ -61,10 +64,7 @@ int main(const int argc, const char * const argv[]) {
 
         if (show_function_values) {
             spdlog::info("showing function values");
-            for (auto i{0UL}; i < size; i++) {
-                fmt::print("{}: f({}) = {}\n", i, x_min + i * dx, values[i]);
-            }
-            fmt::print("\n");
+            print_function_values(values, x_min, dx);
         }
     } else {
         // important: buffer NOT backed by host-allocated vector
@@ -100,13 +100,8 @@ int main(const int argc, const char * const argv[]) {
 
         if (show_function_values) {
             sycl::host_accessor values{v_buf};
-
             spdlog::info("showing function values");
-
-            for (auto i{0UL}; i < size; i++) {
-                fmt::print("{}: f({}) = {}\n", i, x_min + i * dx, values[i]);
-            }
-            fmt::print("\n");
+            print_function_values(values, x_min, dx);
         }
     }
     spdlog::info("results should be available now");
