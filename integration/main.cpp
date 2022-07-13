@@ -55,7 +55,7 @@ int main(const int argc, const char * const argv[]) {
             // x = x_min + i * dx
             //   = x_min + i * (x_max - x_min) / number_of_trapezoids
             //   = (x_min * number_of_trapezoids + i * (x_max - x_min)) / number_of_trapezoids
-            const auto x = (x_min * (number_of_trapezoids - i) + x_max * i) / number_of_trapezoids;
+            const auto x{(x_min * (number_of_trapezoids - i) + x_max * i) / number_of_trapezoids};
             values[i] = f(x);
             result += trapezoid(values[i - 1], values[i], half_dx);
         }
@@ -78,16 +78,16 @@ int main(const int argc, const char * const argv[]) {
 
         // populate buffer with function values
         q.submit([&](auto & h) {
-            sycl::accessor v{v_buf, h};
+            const sycl::accessor v{v_buf, h};
             h.parallel_for(size, [=](const auto & index) {
-                const double x = (x_min * (number_of_trapezoids - index) + x_max * index) / number_of_trapezoids;
+                const double x{(x_min * (number_of_trapezoids - index) + x_max * index) / number_of_trapezoids};
                 v[index] = f(x);
             });
         });
 
         // perform reduction into result
         q.submit([&](auto & h) {
-            sycl::accessor v{v_buf, h};
+            const sycl::accessor v{v_buf, h};
             const auto sum_reduction{sycl::reduction(r_buf, h, sycl::plus<>())};
             h.parallel_for(sycl::range<1>{number_of_trapezoids}, sum_reduction, [=](const auto & index, auto & sum) {
                 sum.combine(trapezoid(v[index], v[index + 1], half_dx));
