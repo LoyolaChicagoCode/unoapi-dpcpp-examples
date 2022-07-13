@@ -1,6 +1,7 @@
 #include <spdlog/spdlog.h>
 #include <gtest/gtest.h>
 
+#include "f.h"
 #include "trapezoid.h"
 
 class IntegrationTest : public testing::Test {
@@ -24,4 +25,8 @@ TEST_F(IntegrationTest, Simple2) {
 
 TEST_F(IntegrationTest, Simple3) {
     EXPECT_EQ(trapezoid(-1, 1, 0.5), 0);
+}
+
+TEST_F(IntegrationTest, F1) {
+    EXPECT_EQ(f(0.5), 1);
 }
