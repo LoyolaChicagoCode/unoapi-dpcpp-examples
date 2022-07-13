@@ -38,12 +38,11 @@ int main(const int argc, const char * const argv[]) {
     }
 
     const auto size{number_of_trapezoids + 1};
-    const auto dx = (x_max - x_min) / number_of_trapezoids;
-    const auto half_dx = 0.5 * dx; // precomputed for area calculation
+    const auto dx{(x_max - x_min) / number_of_trapezoids};
+    const auto half_dx{0.5 * dx}; // precomputed for area calculation
+    double result{0.0};
 
     spdlog::info("integrating function from {} to {} using {} trapezoid(s), dx = {}", x_min, x_max, number_of_trapezoids, dx);
-
-    double result{0.0};
 
     if (run_sequentially) {
         std::vector values(size, 0.0);
@@ -103,8 +102,8 @@ int main(const int argc, const char * const argv[]) {
             print_function_values(values, x_min, dx);
         }
     }
-    spdlog::info("result should be available now");
 
+    spdlog::info("result should be available now");
     fmt::print("result = {}\n", result);
 
     return 0;
