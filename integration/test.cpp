@@ -5,6 +5,8 @@
 #include "trapezoid.h"
 
 class IntegrationTest : public testing::Test {
+public:
+    static constexpr double EPS{1e-5};
 protected:
     static void SetUpTestSuite() {
         spdlog::set_level(spdlog::level::off);
@@ -16,17 +18,17 @@ protected:
 };
 
 TEST_F(IntegrationTest, Simple1) {
-    EXPECT_EQ(trapezoid(1, 1, 0.5), 1);
+    EXPECT_NEAR(trapezoid(1, 1, 0.5), 1, EPS);
 }
 
 TEST_F(IntegrationTest, Simple2) {
-    EXPECT_EQ(trapezoid(0, 1, 0.5), 0.5);
+    EXPECT_NEAR(trapezoid(0, 1, 0.5), 0.5, EPS);
 }
 
 TEST_F(IntegrationTest, Simple3) {
-    EXPECT_EQ(trapezoid(-1, 1, 0.5), 0);
+    EXPECT_NEAR(trapezoid(-1, 1, 0.5), 0, EPS);
 }
 
 TEST_F(IntegrationTest, F1) {
-    EXPECT_EQ(f(0.5), 1);
+    EXPECT_NEAR(f(0.5), 1, EPS);
 }
