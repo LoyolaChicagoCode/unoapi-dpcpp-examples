@@ -10,9 +10,8 @@
 #include <CL/sycl.hpp>
 #include <dpc_common.hpp>
 
+#include "f.h"
 #include "trapezoid.h"
-
-double f(double x);
 
 int main(const int argc, const char * const argv[]) {
     constexpr size_t DEFAULT_NUMBER_OF_TRAPEZOIDS{10};
@@ -115,8 +114,4 @@ int main(const int argc, const char * const argv[]) {
     fmt::print("result = {}\n", result);
 
     return 0;
-}
-
-double f(const double x) {
-    return cos(x) * cos(x) + sin(x) * sin(x);
 }
