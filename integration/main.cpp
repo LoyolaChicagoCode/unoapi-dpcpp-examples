@@ -97,7 +97,7 @@ int main(const int argc, const char * const argv[]) {
         spdlog::info("done submitting to queue...waiting for results");
 
         if (show_function_values) {
-            sycl::host_accessor values{v_buf};
+            const sycl::host_accessor values{v_buf};
             spdlog::info("showing function values");
             print_function_values(values, x_min, dx);
         }
