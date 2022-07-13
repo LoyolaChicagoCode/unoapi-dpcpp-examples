@@ -61,6 +61,7 @@ int main(const int argc, const char * const argv[]) {
         }
 
         if (show_function_values) {
+            spdlog::info("showing function values");
             for (auto i{0UL}; i < size; i++) {
                 fmt::print("{}: f({}) = {}\n", i, x_min + i * dx, values[i]);
             }
