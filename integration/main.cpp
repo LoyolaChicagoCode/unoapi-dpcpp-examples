@@ -55,9 +55,9 @@ int main(const int argc, const char * const argv[]) {
 
         // populate vector with function values and add trapezoid area to result
         values[0] = f(x_min);
-        for (auto i{1UL}; i <= number_of_trapezoids; i++) {
-            values[i] = f(x_min + i * dx);
-            result += trapezoid(values[i - 1], values[i], half_dx);
+        for (auto i{0UL}; i < number_of_trapezoids; i++) {
+            values[i + 1] = f(x_min + i * dx);
+            result += trapezoid(values[i], values[i + 1], half_dx);
         }
 
         spdlog::info("result should be available now");
