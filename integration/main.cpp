@@ -9,6 +9,8 @@
 #include "f.h"
 #include "trapezoid.h"
 
+// function template to avoid code repetition (DRY)
+// works as long as the first argument has a size() method and an indexing operator[]
 template <class Indexable> void print_function_values(const Indexable & values, const double x_min, const double dx) {
     for (auto i{0UL}; i < values.size(); i++) {
         fmt::print("{}: f({}) = {}\n", i, x_min + i * dx, values[i]);
