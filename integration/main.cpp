@@ -40,12 +40,12 @@ int main(const int argc, const char * const argv[]) {
     const auto size{number_of_trapezoids + 1};
     const auto dx{(x_max - x_min) / number_of_trapezoids};
     const auto half_dx{0.5 * dx}; // precomputed for area calculation
-    double result{0.0};
 
     spdlog::info("integrating function from {} to {} using {} trapezoid(s), dx = {}", x_min, x_max, number_of_trapezoids, dx);
 
     if (run_sequentially) {
         std::vector values(size, 0.0);
+        double result{0.0};
 
         spdlog::info("starting sequential integration");
 
@@ -60,6 +60,9 @@ int main(const int argc, const char * const argv[]) {
             result += trapezoid(values[i - 1], values[i], half_dx);
         }
 
+        spdlog::info("result should be available now");
+        fmt::print("result = {}\n", result);
+
         if (show_function_values) {
             spdlog::info("showing function values");
             print_function_values(values, x_min, dx);
@@ -68,7 +71,7 @@ int main(const int argc, const char * const argv[]) {
         // important: buffer NOT backed by host-allocated vector
         // this allows the data to live on the device until accessed on the host (if desired)
         sycl::buffer<double> v_buf{sycl::range<1>{size}};
-        sycl::buffer<double> r_buf{&result, 1};
+        sycl::buffer<double> r_buf{sycl::range<1>{1}};
 
         spdlog::info("preparing for vectorized integration");
 
@@ -80,7 +83,7 @@ int main(const int argc, const char * const argv[]) {
         q.submit([&](auto & h) {
             const sycl::accessor v{v_buf, h};
             h.parallel_for(size, [=](const auto & index) {
-                const double x{(x_min * (number_of_trapezoids - index) + x_max * index) / number_of_trapezoids};
+                const auto x{(x_min * (number_of_trapezoids - index) + x_max * index) / number_of_trapezoids};
                 v[index] = f(x);
             });
         });
@@ -96,15 +99,18 @@ int main(const int argc, const char * const argv[]) {
 
         spdlog::info("done submitting to queue...waiting for results");
 
+        const sycl::host_accessor result{r_buf};
+        spdlog::info("result should be available now");
+        fmt::print("result = {}\n", result[0]);
+
         if (show_function_values) {
+            spdlog::info("preparing function values");
             const sycl::host_accessor values{v_buf};
             spdlog::info("showing function values");
             print_function_values(values, x_min, dx);
         }
     }
 
-    spdlog::info("result should be available now");
-    fmt::print("result = {}\n", result);
-
+    spdlog::info("all done for now");
     return 0;
 }
