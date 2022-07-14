@@ -24,14 +24,16 @@ int main(const int argc, const char * const argv[]) {
     double x_max{1.0};
     bool show_function_values{false};
     bool run_sequentially{false};
+    bool run_hostonly{false};
 
     CLI::App app{"Trapezoidal integration"};
     app.option_defaults()->always_capture_default(true);
     app.add_option("-n,--trapezoids", number_of_trapezoids, "number of trapezoids")->check(CLI::PositiveNumber.description(" >= 1"));
     app.add_option("-l,--lower,--xmin", x_min, "x min value");
     app.add_option("-u,--upper,--xmax", x_max, "x max value");
-    app.add_flag("-v,--show_function_values", show_function_values);
+    app.add_flag("-v,--show-function-values", show_function_values);
     app.add_flag("-s,--sequential", run_sequentially);
+    app.add_flag("-o,--host-only", run_hostonly);
     CLI11_PARSE(app, argc, argv);
 
     if (x_min > x_max) {
@@ -54,11 +56,7 @@ int main(const int argc, const char * const argv[]) {
         // populate vector with function values and add trapezoid area to result
         values[0] = f(x_min);
         for (auto i{1UL}; i <= number_of_trapezoids; i++) {
-            // x = x_min + i * dx
-            //   = x_min + i * (x_max - x_min) / number_of_trapezoids
-            //   = (x_min * number_of_trapezoids + i * (x_max - x_min)) / number_of_trapezoids
-            const auto x{(x_min * (number_of_trapezoids - i) + x_max * i) / number_of_trapezoids};
-            values[i] = f(x);
+            values[i] = f(x_min + i * dx);
             result += trapezoid(values[i - 1], values[i], half_dx);
         }
 
@@ -69,8 +67,34 @@ int main(const int argc, const char * const argv[]) {
             spdlog::info("showing function values");
             print_function_values(values, x_min, dx);
         }
+    } else if (run_hostonly) {
+        // TODO discuss whether this is valuable because we are losing SYCL's reduction semantics
+        sycl::buffer<double> v_buf{sycl::range<1>{size}};
+        sycl::buffer<double> r_buf{sycl::range<1>{1}};
+
+        spdlog::info("starting host-only integration");
+
+        // populate buffer with function values
+        const sycl::host_accessor v{v_buf};
+        for (auto index{0UL}; index < size; index++) {
+            v[index] = f(x_min + index * dx);
+        }
+
+        // perform reduction into result
+        const sycl::host_accessor result{r_buf};
+        for (auto index{0UL}; index < number_of_trapezoids; index++) {
+            result[0] += trapezoid(v[index], v[index + 1], half_dx);
+        }
+
+        spdlog::info("result should be available now");
+        fmt::print("result = {}\n", result[0]);
+
+        if (show_function_values) {
+            spdlog::info("showing function values");
+            print_function_values(v, x_min, dx);
+        }
     } else {
-        // important: buffer NOT backed by host-allocated vector
+        // important: buffer NOT explicitly backed by host-allocated vector
         // this allows the data to live on the device until accessed on the host (if desired)
         sycl::buffer<double> v_buf{sycl::range<1>{size}};
         sycl::buffer<double> r_buf{sycl::range<1>{1}};
@@ -85,8 +109,7 @@ int main(const int argc, const char * const argv[]) {
         q.submit([&](auto & h) {
             const sycl::accessor v{v_buf, h};
             h.parallel_for(size, [=](const auto & index) {
-                const auto x{(x_min * (number_of_trapezoids - index) + x_max * index) / number_of_trapezoids};
-                v[index] = f(x);
+                v[index] = f(x_min + index * dx);
             });
         }); // end of command group
 
