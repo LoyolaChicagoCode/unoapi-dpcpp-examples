@@ -86,7 +86,7 @@ int main(const int argc, const char * const argv[]) {
                 const auto x{(x_min * (number_of_trapezoids - index) + x_max * index) / number_of_trapezoids};
                 v[index] = f(x);
             });
-        });
+        }); // end of command group
 
         // perform reduction into result
         q.submit([&](auto & h) {
@@ -95,7 +95,7 @@ int main(const int argc, const char * const argv[]) {
             h.parallel_for(sycl::range<1>{number_of_trapezoids}, sum_reduction, [=](const auto & index, auto & sum) {
                 sum.combine(trapezoid(v[index], v[index + 1], half_dx));
             });
-        });
+        }); // end of command group
 
         spdlog::info("done submitting to queue...waiting for results");
 
@@ -109,7 +109,7 @@ int main(const int argc, const char * const argv[]) {
             spdlog::info("showing function values");
             print_function_values(values, x_min, dx);
         }
-    }
+    } // end of scope waits for the queued work to complete
 
     spdlog::info("all done for now");
     return 0;
