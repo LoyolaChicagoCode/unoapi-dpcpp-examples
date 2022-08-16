@@ -11,9 +11,9 @@
 
 // function template to avoid code repetition (DRY)
 // works as long as the first argument has a size() method and an indexing operator[]
-template <class Indexable> void print_function_values(const Indexable & values, const double x_min, const double dx) {
+template <class Indexable> void print_function_values(const Indexable & values, const double x_min, const double dx, const uint x_precision, const uint y_precision) {
     for (auto i{0UL}; i < values.size(); i++) {
-        fmt::print("{}: f({}) = {}\n", i, x_min + i * dx, values[i]);
+        fmt::print("{}: f({:.{}f}) = {:.{}f}\n", i, x_min + i * dx, x_precision, values[i], y_precision);
     }
 }
 
@@ -25,6 +25,8 @@ int main(const int argc, const char * const argv[]) {
     bool show_function_values{false};
     bool run_sequentially{false};
     bool run_hostonly{false};
+    uint x_precision{1};
+    uint y_precision{1};
 
     CLI::App app{"Trapezoidal integration"};
     app.option_defaults()->always_capture_default(true);
@@ -34,6 +36,8 @@ int main(const int argc, const char * const argv[]) {
     app.add_flag("-v,--show-function-values", show_function_values);
     app.add_flag("-s,--sequential", run_sequentially);
     app.add_flag("-o,--host-only", run_hostonly);
+    app.add_option("-x,--x-format-precision", x_precision, "decimal precision for x values")->check(CLI::PositiveNumber.description(" >= 1"));
+    app.add_option("-y,--y-format-precision", y_precision, "decimal precision for y (function) values")->check(CLI::PositiveNumber.description(" >= 1"));
     CLI11_PARSE(app, argc, argv);
 
     if (x_min > x_max) {
@@ -65,7 +69,7 @@ int main(const int argc, const char * const argv[]) {
 
         if (show_function_values) {
             spdlog::info("showing function values");
-            print_function_values(values, x_min, dx);
+            print_function_values(values, x_min, dx, x_precision, y_precision);
         }
     } else if (run_hostonly) {
         // TODO discuss whether this is valuable because we are losing SYCL's reduction semantics
@@ -91,7 +95,7 @@ int main(const int argc, const char * const argv[]) {
 
         if (show_function_values) {
             spdlog::info("showing function values");
-            print_function_values(v, x_min, dx);
+            print_function_values(v, x_min, dx, x_precision, y_precision);
         }
     } else {
         // important: buffer NOT explicitly backed by host-allocated vector
@@ -132,7 +136,7 @@ int main(const int argc, const char * const argv[]) {
             spdlog::info("preparing function values");
             const sycl::host_accessor values{v_buf};
             spdlog::info("showing function values");
-            print_function_values(values, x_min, dx);
+            print_function_values(values, x_min, dx, x_precision, y_precision);
         }
     } // end of scope waits for the queued work to complete
 
