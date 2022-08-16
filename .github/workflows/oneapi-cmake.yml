@@ -17,14 +17,13 @@ jobs:
       BUILD_DIR: cmake-build-debug
 
     steps:
+    - name: Checkout project code
+      uses: actions/checkout@v2
+
     - name: Install Intel oneAPI
       timeout-minutes: 5
       run: |
-        echo "working directory: $PWD"
-        $GITHUB_WORKSPACE/install-dpcpp.sh
-
-    - name: Checkout project code
-      uses: actions/checkout@v2
+        ./install-dpcpp.sh
 
     - name: Set oneAPI environment
       run: |
