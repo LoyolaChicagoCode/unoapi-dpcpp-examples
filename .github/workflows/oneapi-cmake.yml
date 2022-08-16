@@ -20,6 +20,7 @@ jobs:
     - name: Install Intel oneAPI
       timeout-minutes: 5
       run: |
+        echo "working directory: $PWD"
         $GITHUB_WORKSPACE/install-dpcpp.sh
 
     - name: Checkout project code
