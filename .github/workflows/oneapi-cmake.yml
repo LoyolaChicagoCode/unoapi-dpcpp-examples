@@ -20,7 +20,7 @@ jobs:
     - name: Install Intel oneAPI
       timeout-minutes: 5
       run: |
-        $BUILD_DIR/install-dpcpp.sh
+        ./install-dpcpp.sh
 
     - name: Checkout project code
       uses: actions/checkout@v2
