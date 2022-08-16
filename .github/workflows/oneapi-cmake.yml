@@ -17,19 +17,10 @@ jobs:
       BUILD_DIR: cmake-build-debug
 
     steps:
-    - name: Intel Apt repository
-      timeout-minutes: 1
-      run: |
-        wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
-        sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
-        rm GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
-        echo "deb https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
-        sudo apt update
-        
     - name: Install Intel oneAPI
       timeout-minutes: 5
       run: |
-        sudo apt install intel-oneapi-compiler-dpcpp-cpp
+        $BUILD_DIR/install-dpcpp.sh
 
     - name: Checkout project code
       uses: actions/checkout@v2
