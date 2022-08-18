@@ -1,0 +1,8 @@
+\begin{cppcode*}{firstnumber=116}
+        q.submit([&](auto & h) {
+            const sycl::accessor v{v_buf, h};
+            h.parallel_for(size, [=](const auto & index) {
+                v[index] = f(x_min + index * dx);
+            });
+        }); // end of command group
+\end{cppcode*}

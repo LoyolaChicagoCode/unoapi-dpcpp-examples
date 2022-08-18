@@ -1,0 +1,9 @@
+\begin{cppcode*}{firstnumber=126}
+        q.submit([&](auto & h) {
+            const sycl::accessor v{v_buf, h};
+            const auto sum_reduction{sycl::reduction(r_buf, h, sycl::plus<>())};
+            h.parallel_for(sycl::range<1>{number_of_trapezoids}, sum_reduction, [=](const auto & index, auto & sum) {
+                sum.combine(trapezoid(v[index], v[index + 1], half_dx));
+            });
+        }); // end of command group
+\end{cppcode*}

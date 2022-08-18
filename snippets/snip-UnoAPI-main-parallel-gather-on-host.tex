@@ -1,0 +1,5 @@
+\begin{cppcode*}{firstnumber=138}
+        const sycl::host_accessor result{r_buf};
+        spdlog::info("result should be available now");
+        fmt::print("result = {}\n", result[0]);
+\end{cppcode*}

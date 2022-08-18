@@ -1,0 +1,14 @@
+\begin{cppcode*}{firstnumber=8}
+class IntegrationTest : public testing::Test {
+public:
+    static constexpr double EPS{1e-5};
+protected:
+    static void SetUpTestSuite() {
+        spdlog::set_level(spdlog::level::off);
+        spdlog::info("spdlog level set to {}", spdlog::get_level()); // should be invisible!
+    }
+
+    static void TearDownTestSuite() {
+    }
+};
+\end{cppcode*}
