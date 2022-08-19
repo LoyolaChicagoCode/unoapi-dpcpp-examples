@@ -1,0 +1,23 @@
+\begin{cppcode*}{firstnumber=65}
+    if (run_sequentially) {
+        std::vector values(size, 0.0);
+        double result{0.0};
+
+        spdlog::info("starting sequential integration");
+
+        // populate vector with function values and add trapezoid area to result
+        values[0] = f(x_min);
+        for (auto i{0UL}; i < number_of_trapezoids; i++) {
+            values[i + 1] = f(x_min + i * dx);
+            result += trapezoid(values[i], values[i + 1], half_dx);
+        }
+
+        spdlog::info("result should be available now");
+        fmt::print("result = {}\n", result);
+
+        if (show_function_values) {
+            spdlog::info("showing function values");
+            print_function_values(values, x_min, dx, x_precision, y_precision);
+        }
+    }
+\end{cppcode*}

@@ -1,0 +1,4 @@
+\begin{cppcode*}{firstnumber=110}
+        sycl::queue q{*device_selector, dpc_common::exception_handler, sycl::property::queue::in_order()};
+        spdlog::info("Device: {}", q.get_device().get_info<sycl::info::device::name>());
+\end{cppcode*}
