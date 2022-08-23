@@ -1,5 +1,3 @@
-#include <chrono>
-
 #include <CLI/CLI.hpp>
 #include <fmt/format.h>
 #include <spdlog/spdlog.h>
@@ -10,10 +8,7 @@
 
 #include "f.h"
 #include "trapezoid.h"
-
-using std::chrono::steady_clock;
-using std::chrono::milliseconds;
-using std::chrono::duration_cast;
+#include "timestamps.h"
 
 // {{UnoAPI:main-print-function-values:begin}}
 // function template to avoid code repetition (DRY)
@@ -28,17 +23,16 @@ template <class Indexable> void print_function_values(const Indexable & values, 
 int main(const int argc, const char * const argv[]) {
     // {{UnoAPI:main-declarations:begin}}
     constexpr size_t DEFAULT_NUMBER_OF_TRAPEZOIDS{10};
-    constexpr std::string_view DEFAULT_PERF_OUTPUT{"performance.txt"};
     size_t number_of_trapezoids{DEFAULT_NUMBER_OF_TRAPEZOIDS};
     double x_min{0.0};
     double x_max{1.0};
     bool show_function_values{false};
     bool run_sequentially{false};
     bool run_cpuonly{false};
-    bool show_perfdata{false};
     uint x_precision{1};
     uint y_precision{1};
-    std::string perf_output{DEFAULT_PERF_OUTPUT};
+    std::string perf_output;
+    ts_vector timestamps;
     // {{UnoAPI:main-declarations:end}}
 
     // {{UnoAPI:main-cli-setup-and-parse:begin}}
@@ -50,10 +44,9 @@ int main(const int argc, const char * const argv[]) {
     app.add_flag("-v,--show-function-values", show_function_values);
     app.add_flag("-s,--sequential", run_sequentially);
     app.add_flag("-c,--cpu-only", run_cpuonly);
-    app.add_flag("-p,--show-perfdata", show_perfdata);
     app.add_option("-x,--x-format-precision", x_precision, "decimal precision for x values")->check(CLI::PositiveNumber.description(" >= 1"));
     app.add_option("-y,--y-format-precision", y_precision, "decimal precision for y (function) values")->check(CLI::PositiveNumber.description(" >= 1"));
-    app.add_option("-f,--perfdata-file", perf_output, "output file for performance data");
+    app.add_option("-p,--perfdata-output-file", perf_output, "output file for performance data");
 
     CLI11_PARSE(app, argc, argv);
     // {{UnoAPI:main-cli-setup-and-parse:end}}
@@ -73,6 +66,8 @@ int main(const int argc, const char * const argv[]) {
 
     // {{UnoAPI:main-sequential-option:begin}}
     if (run_sequentially) {
+        mark_time(timestamps, "Start time");
+
         std::vector values(size, 0.0);
         double result{0.0};
 
@@ -92,6 +87,9 @@ int main(const int argc, const char * const argv[]) {
             spdlog::info("showing function values");
             print_function_values(values, x_min, dx, x_precision, y_precision);
         }
+
+        mark_time(timestamps, "Entire job");
+        print_timestamps(timestamps, perf_output);
     }
     // {{UnoAPI:main-sequential-option:end}}
     

@@ -1,4 +1,4 @@
-add_executable(integration main.cpp f.cpp trapezoid.cpp)
+add_executable(integration main.cpp f.cpp trapezoid.cpp timestamps.cpp)
 target_link_libraries(integration fmt::fmt spdlog::spdlog CLI11::CLI11)
 
 enable_testing()
