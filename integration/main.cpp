@@ -62,8 +62,7 @@ int main(const int argc, const char * const argv[]) {
         spdlog::error("invalid range: [{}, {}]", x_min, x_max);
         return 1;
     }
-
-
+    
     // {{UnoAPI:main-domain-setup:begin}}
     const auto size{number_of_trapezoids + 1};
     const auto dx{(x_max - x_min) / number_of_trapezoids};
