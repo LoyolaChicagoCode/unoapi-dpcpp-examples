@@ -33,6 +33,7 @@ int main(const int argc, const char * const argv[]) {
     uint y_precision{1};
     std::string perf_output;
     ts_vector timestamps;
+    std::string device_name;
     // {{UnoAPI:main-declarations:end}}
 
     // {{UnoAPI:main-cli-setup-and-parse:begin}}
@@ -63,14 +64,15 @@ int main(const int argc, const char * const argv[]) {
     // {{UnoAPI:main-domain-setup:end}}
 
     spdlog::info("integrating function from {} to {} using {} trapezoid(s), dx = {}", x_min, x_max, number_of_trapezoids, dx);
+    mark_time(timestamps, "Start");
 
     // {{UnoAPI:main-sequential-option:begin}}
     if (run_sequentially) {
-        mark_time(timestamps, "Start time");
-
+        device_name = "sequential";
         std::vector values(size, 0.0);
         double result{0.0};
 
+        mark_time(timestamps,"Memory allocation");
         spdlog::info("starting sequential integration");
 
         // populate vector with function values and add trapezoid area to result
@@ -80,16 +82,15 @@ int main(const int argc, const char * const argv[]) {
             result += trapezoid(values[i], values[i + 1], half_dx);
         }
 
+        mark_time(timestamps, "Integration");
         spdlog::info("result should be available now");
         fmt::print("result = {}\n", result);
 
         if (show_function_values) {
             spdlog::info("showing function values");
             print_function_values(values, x_min, dx, x_precision, y_precision);
+            mark_time(timestamps, "Output");
         }
-
-        mark_time(timestamps, "Entire job");
-        print_timestamps(timestamps, perf_output);
     }
     // {{UnoAPI:main-sequential-option:end}}
     
@@ -101,6 +102,7 @@ int main(const int argc, const char * const argv[]) {
         sycl::buffer<double> r_buf{sycl::range<1>{1}};
         // {{UnoAPI:main-parallel-buffers:end}}
 
+        mark_time(timestamps,"Memory allocation");
         spdlog::info("preparing for vectorized integration");
 
         // {{UnoAPI:main-parallel-devices:begin}}
@@ -113,7 +115,9 @@ int main(const int argc, const char * const argv[]) {
         // we use an in-order queue for this simple, sequential computation
         // {{UnoAPI:main-parallel-inorder-q:begin}}
         sycl::queue q{device_selector, dpc_common::exception_handler, sycl::property::queue::in_order()};
-        spdlog::info("Device: {}", q.get_device().get_info<sycl::info::device::name>());
+        mark_time(timestamps,"Queue creation");
+        device_name = q.get_device().get_info<sycl::info::device::name>();
+        spdlog::info("Device: {}", device_name);
         // {{UnoAPI:main-parallel-inorder-q:end}}
 
         // populate buffer with function values
@@ -141,6 +145,7 @@ int main(const int argc, const char * const argv[]) {
 
         // {{UnoAPI:main-parallel-gather-on-host:begin}}
         const sycl::host_accessor result{r_buf};
+        mark_time(timestamps,"Integration");
         spdlog::info("result should be available now");
         fmt::print("result = {}\n", result[0]);
         // {{UnoAPI:main-parallel-gather-on-host:end}}
@@ -149,13 +154,18 @@ int main(const int argc, const char * const argv[]) {
         if (show_function_values) {
             spdlog::info("preparing function values");
             const sycl::host_accessor values{v_buf};
+            mark_time(timestamps,"Host data access");
             spdlog::info("showing function values");
             print_function_values(values, x_min, dx, x_precision, y_precision);
+            mark_time(timestamps,"Output");
         }
         // {{UnoAPI:main-parallel-show-results-log:end}}
     }
     // end of scope waits for the queued work to complete
 
+    mark_time(timestamps,"DONE");
     spdlog::info("all done for now");
+    print_timestamps(timestamps, perf_output, device_name);
+
     return 0;
 }
