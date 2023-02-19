@@ -1,9 +1,3 @@
 \begin{cppcode*}{firstnumber=99}
-        sycl::device_selector * device_selector = nullptr;
-
-        if (run_cpuonly) {
-            device_selector = new sycl::cpu_selector{};
-        } else {
-            device_selector = new sycl::default_selector{};
-        }
+        sycl::device device { run_cpuonly ? sycl::cpu_selector_v : sycl::default_selector_v };
 \end{cppcode*}
