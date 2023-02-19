@@ -106,15 +106,12 @@ int main(const int argc, const char * const argv[]) {
         spdlog::info("preparing for vectorized integration");
 
         // {{UnoAPI:main-parallel-devices:begin}}
-        const sycl::device_selector & device_selector{ run_cpuonly ?
-            static_cast<const sycl::device_selector &>(sycl::cpu_selector{}) :
-            static_cast<const sycl::device_selector &>(sycl::default_selector{})
-        };
+        sycl::device device { run_cpuonly ? sycl::cpu_selector_v : sycl::default_selector_v };
         // {{UnoAPI:main-parallel-devices:end}}
 
         // we use an in-order queue for this simple, sequential computation
         // {{UnoAPI:main-parallel-inorder-q:begin}}
-        sycl::queue q{device_selector, dpc_common::exception_handler, sycl::property::queue::in_order()};
+        sycl::queue q{device, dpc_common::exception_handler, sycl::property::queue::in_order()};
         mark_time(timestamps,"Queue creation");
         device_name = q.get_device().get_info<sycl::info::device::name>();
         spdlog::info("Device: {}", device_name);
