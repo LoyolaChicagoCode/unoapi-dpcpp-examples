@@ -52,6 +52,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googletest)
 
+add_subdirectory(modern-cpp)
 add_subdirectory(integration)
 add_subdirectory(matrix_mul)
 add_subdirectory(montecarlo)
