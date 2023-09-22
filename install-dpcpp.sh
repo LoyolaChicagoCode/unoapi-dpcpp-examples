@@ -10,6 +10,6 @@ sudo apt update -q
         
 echo Install Intel oneAPI
 
-sudo apt install -q -y intel-oneapi-compiler-dpcpp-cpp
+sudo apt install -q intel-oneapi-compiler-dpcpp-cpp
 
 echo Done

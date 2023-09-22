@@ -4,8 +4,8 @@
 
 tasks:
   - init: |
-      sudo apt update -q && sudo apt upgrade -y -q
-      sudo apt install cmake
+      sudo apt update -q && sudo apt upgrade -q
+      sudo apt install -q cmake
       ./install-dpcpp.sh
       . ./setvars.sh
       cmake -DCMAKE_BUILD_TYPE=Debug -S . -B build
