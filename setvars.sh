@@ -1,4 +1,4 @@
-source /opt/intel/oneapi/setvars.sh --force
+source /opt/intel/oneapi/setvars.sh --force --include-intel-llvm
 
 export CC=icx
 export CXX=icpx
