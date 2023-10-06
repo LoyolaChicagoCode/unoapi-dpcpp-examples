@@ -31,6 +31,7 @@ int main(const int argc, const char * const argv[]) {
     bool run_cpuonly{false};
     uint x_precision{1};
     uint y_precision{1};
+    uint workload_factor{1};
     std::string perf_output;
     ts_vector timestamps;
     std::string device_name;
@@ -45,6 +46,7 @@ int main(const int argc, const char * const argv[]) {
     app.add_flag("-v,--show-function-values", show_function_values);
     app.add_flag("-s,--sequential", run_sequentially);
     app.add_flag("-c,--cpu-only", run_cpuonly);
+    app.add_option("-w,--workload-factor", workload_factor, "unit workload multiplier factor")->check(CLI::PositiveNumber.description(" >= 1"));
     app.add_option("-x,--x-format-precision", x_precision, "decimal precision for x values")->check(CLI::PositiveNumber.description(" >= 1"));
     app.add_option("-y,--y-format-precision", y_precision, "decimal precision for y (function) values")->check(CLI::PositiveNumber.description(" >= 1"));
     app.add_option("-p,--perfdata-output-file", perf_output, "output file for performance data");
@@ -76,9 +78,17 @@ int main(const int argc, const char * const argv[]) {
         spdlog::info("starting sequential integration");
 
         // populate vector with function values and add trapezoid area to result
-        values[0] = f(x_min);
+        values[0] = 0;
+        for (auto k = 0; k < workload_factor; k++) {
+            values[0] += f(x_min);
+        }
+        values[0] /= workload_factor;
         for (auto i{0UL}; i < number_of_trapezoids; i++) {
-            values[i + 1] = f(x_min + i * dx);
+            values[i + 1] = 0;
+            for (auto k = 0; k < workload_factor; k++) {
+                values[i + 1] += f(x_min + i * dx);
+            }
+            values[i + 1] /= workload_factor;
             result += trapezoid(values[i], values[i + 1], half_dx);
         }
 
@@ -122,7 +132,11 @@ int main(const int argc, const char * const argv[]) {
         q.submit([&](auto & h) {
             const sycl::accessor v{v_buf, h};
             h.parallel_for(size, [=](const auto & index) {
-                v[index] = f(x_min + index * dx);
+                v[index] = 0;
+                for (auto k = 0; k < workload_factor; k++) {
+                    v[index] += f(x_min + index * dx);
+                }
+                v[index] /= workload_factor;
             });
         }); // end of command group
         // {{UnoAPI:main-parallel-submit-parallel-for:end}}
