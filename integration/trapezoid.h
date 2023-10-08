@@ -1,7 +1,7 @@
 #ifndef INTEGRATION_H_
 #define INTEGRATION_H_
 
-#include <CL/sycl.hpp>
+#include <sycl/sycl.hpp>
 
 // {{UnoAPI:trapezoid-interface:begin}}
 SYCL_EXTERNAL double trapezoid(double f1, double f2, double dx);
