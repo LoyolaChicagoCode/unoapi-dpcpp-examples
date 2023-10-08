@@ -27,9 +27,9 @@ jobs:
 
     - name: Set oneAPI environment
       run: |
-        source /opt/intel/oneapi/setvars.sh
+        source /opt/intel/oneapi/setvars.sh --include-intel-llvm
         printenv >> $GITHUB_ENV
-        echo /opt/intel/oneapi/compiler/latest/linux/bin >> $GITHUB_PATH
+        echo /opt/intel/oneapi/compiler/latest/linux/bin-llvm >> $GITHUB_PATH
 
     - name: CMake configure
       run: cmake -DCMAKE_BUILD_TYPE=Debug -S . -B $BUILD_DIR
