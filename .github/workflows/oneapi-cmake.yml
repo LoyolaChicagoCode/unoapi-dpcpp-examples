@@ -12,8 +12,6 @@ jobs:
   linux-intel-oneapi:
     runs-on: ubuntu-latest
     env:
-      CC: clang
-      CXX: clang++
       BUILD_DIR: cmake-build-debug
 
     steps:
@@ -27,7 +25,7 @@ jobs:
 
     - name: Set oneAPI environment
       run: |
-        source /opt/intel/oneapi/setvars.sh --include-intel-llvm
+        source ./setvars.sh
         printenv >> $GITHUB_ENV
         echo /opt/intel/oneapi/compiler/latest/linux/bin-llvm >> $GITHUB_PATH
 
