@@ -7,7 +7,7 @@
 
 // dpc_common.hpp can be found in the dev-utilities include folder.
 // e.g., $ONEAPI_ROOT/dev-utilities/<version>/include/dpc_common.hpp
-#include <CL/sycl.hpp>
+#include <sycl/sycl.hpp>
 #include <oneapi/dpl/random>
 #include <dpc_common.hpp>
 //#include <sycl/ext/intel/ac_types/ac_int.hpp>

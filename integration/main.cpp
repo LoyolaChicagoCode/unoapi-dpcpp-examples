@@ -3,7 +3,7 @@
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 
-#include <CL/sycl.hpp>
+#include <sycl/sycl.hpp>
 #include <dpc_common.hpp>
 
 #include "f.h"
