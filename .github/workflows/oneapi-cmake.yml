@@ -12,8 +12,8 @@ jobs:
   linux-intel-oneapi:
     runs-on: ubuntu-latest
     env:
-      CC: icx
-      CXX: dpcpp
+      CC: clang
+      CXX: clang++
       BUILD_DIR: cmake-build-debug
 
     steps:
