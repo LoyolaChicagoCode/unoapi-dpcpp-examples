@@ -4,7 +4,7 @@
 
 # Synopsis
 
-A number of example programs for the [UnoAPI](https://unoapi.cs.luc.edu) curricular modules for high-performance computing using data-parallel C++ with Intel’s OneAPI under development at [Loyola University Chicago](https://luc.edu/cs).
+A number of example programs for the [UnoAPI](https://unoapi.cs.luc.edu) curricular modules for high-performance computing using data-parallel C++ with Intel’s oneAPI under development at [Loyola University Chicago](https://luc.edu/cs).
 
 All examples are intended to follow current practices, such as
 
