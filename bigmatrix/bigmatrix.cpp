@@ -2,6 +2,7 @@
 #include <limits>
 #include <chrono>
 
+#include <CLI/CLI.hpp>
 // TODO discuss why this is necessary
 #define FMT_HEADER_ONLY
 #include <fmt/format.h>
@@ -15,12 +16,18 @@ using std::chrono::steady_clock;
 using std::chrono::milliseconds;
 using std::chrono::duration_cast;
 
-constexpr int M = 20000;
+constexpr int DEFAULT_M = 20000;
 
-int main() {
+int main(const int argc, const char * const argv[]) {
+  uint M{DEFAULT_M};
 
   fmt::print("what up - this is fmt\n");
   spdlog::info("what up - this is spdlog");
+
+  CLI::App app{"Square matrix simple map-reduce example"};
+  app.option_defaults()->always_capture_default(true);
+  app.add_option("-s,--size", M, "size")->check(CLI::PositiveNumber.description(" >= 1"));
+  CLI11_PARSE(app, argc, argv);
 
   steady_clock::time_point zero;
 
@@ -31,8 +38,8 @@ int main() {
   fmt::print("Device: {}\n", q.get_device().get_info<sycl::info::device::name>());
 
   // oneAPI figures out where to allocate these buffers
-  sycl::buffer<int, 2> m_buf(sycl::range(M, M));
-  sycl::buffer<long> r_buf{sycl::range<1>{1}};
+  sycl::buffer<uint, 2> m_buf(sycl::range(M, M));
+  sycl::buffer<ulong> r_buf{sycl::range<1>{1}};
 
   fmt::print("starting to submit kernels to queue\n");
   zero = steady_clock::now();
