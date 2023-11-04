@@ -30,12 +30,14 @@ int main() {
 
   fmt::print("Device: {}\n", q.get_device().get_info<sycl::info::device::name>());
 
+  // oneAPI figures out where to allocate these buffers
   sycl::buffer<int, 2> m_buf(sycl::range(M, M));
   sycl::buffer<long> r_buf{sycl::range<1>{1}};
 
   fmt::print("starting to submit kernels to queue\n");
   zero = steady_clock::now();
 
+  // initialize matrix on accelerator
   q.submit([&](auto &h) {
     sycl::accessor m(m_buf, h, sycl::write_only);
 
@@ -44,6 +46,16 @@ int main() {
     });
   });
 
+  // map: transform matrix elements on accelerator
+  q.submit([&](auto &h) {
+    sycl::accessor m(m_buf, h);
+
+    h.parallel_for(sycl::range(M, M), [=](auto index) {
+      m[index[0]][index[1]] *= 2;
+    });
+  });
+
+  // reduce: add matrix elements on accelerator
   q.submit([&](auto &h) {
     sycl::accessor m(m_buf, h, sycl::read_only);
     const auto sum_reduction{sycl::reduction(r_buf, h, sycl::plus<>())};
@@ -53,7 +65,7 @@ int main() {
     });
   });
 
-  spdlog::info("done submitting to queue...waiting for results");
+  spdlog::info("done submitting jobs to queue...waiting for results");
 
   const sycl::host_accessor result{r_buf};
   spdlog::info("result should be available now");
