@@ -22,8 +22,7 @@ template <class Indexable> void print_function_values(const Indexable & values, 
 
 int main(const int argc, const char * const argv[]) {
     // {{UnoAPI:main-declarations:begin}}
-    constexpr size_t DEFAULT_NUMBER_OF_TRAPEZOIDS{10};
-    size_t number_of_trapezoids{DEFAULT_NUMBER_OF_TRAPEZOIDS};
+    size_t number_of_trapezoids{10};
     double x_min{0.0};
     double x_max{1.0};
     bool show_function_values{false};
@@ -40,13 +39,13 @@ int main(const int argc, const char * const argv[]) {
     // {{UnoAPI:main-cli-setup-and-parse:begin}}
     CLI::App app{"Trapezoidal integration"};
     app.option_defaults()->always_capture_default(true);
-    app.add_option("-n,--trapezoids", number_of_trapezoids, "number of trapezoids")->check(CLI::PositiveNumber.description(" >= 1"));
+    app.add_option("-n,--trapezoids", number_of_trapezoids, "number of outer (parallel) trapezoids")->check(CLI::PositiveNumber.description(" >= 1"));
     app.add_option("-l,--lower,--xmin", x_min, "x min value");
     app.add_option("-u,--upper,--xmax", x_max, "x max value");
     app.add_flag("-v,--show-function-values", show_function_values);
     app.add_flag("-s,--sequential", run_sequentially);
     app.add_flag("-c,--cpu-only", run_cpuonly);
-    app.add_option("-w,--workload-factor", workload_factor, "unit workload multiplier factor")->check(CLI::PositiveNumber.description(" >= 1"));
+    app.add_option("-w,--workload-factor", workload_factor, "number of inner (sequential) trapezoids (for each outer trapezoid)")->check(CLI::PositiveNumber.description(" >= 1"));
     app.add_option("-x,--x-format-precision", x_precision, "decimal precision for x values")->check(CLI::PositiveNumber.description(" >= 1"));
     app.add_option("-y,--y-format-precision", y_precision, "decimal precision for y (function) values")->check(CLI::PositiveNumber.description(" >= 1"));
     app.add_option("-p,--perfdata-output-file", perf_output, "output file for performance data");
@@ -72,24 +71,25 @@ int main(const int argc, const char * const argv[]) {
     if (run_sequentially) {
         device_name = "sequential";
         std::vector values(size, 0.0);
-        double result{0.0};
+        auto result{0.0};
+        const auto dx_inner{dx / workload_factor};
+        const auto half_dx_inner{dx_inner / 2};
 
         mark_time(timestamps,"Memory allocation");
         spdlog::info("starting sequential integration");
 
         // populate vector with function values and add trapezoid area to result
-        values[0] = 0;
-        for (auto k = 0; k < workload_factor; k++) {
-            values[0] += f(x_min);
-        }
-        values[0] /= workload_factor;
+        values[0] += f(x_min);
         for (auto i{0UL}; i < number_of_trapezoids; i++) {
-            values[i + 1] = 0;
-            for (auto k = 0; k < workload_factor; k++) {
-                values[i + 1] += f(x_min + i * dx);
+            auto inner{0.0};
+            auto y_left{f(x_min + i * dx)};
+            for (auto j{0UL}; j < workload_factor; j++) {
+                auto y_right{f(x_min + i * dx + (j + 1) * dx_inner)};
+                inner += trapezoid(y_left, y_right, half_dx_inner);
+                y_left = y_right;
             }
-            values[i + 1] /= workload_factor;
-            result += trapezoid(values[i], values[i + 1], half_dx);
+            values[i + 1] = y_left;
+            result += inner;
         }
 
         mark_time(timestamps, "Integration");
