@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include <CLI/CLI.hpp>
 #include <fmt/format.h>
 #include <spdlog/spdlog.h>
@@ -62,6 +64,8 @@ int main(const int argc, const char * const argv[]) {
     const auto size{number_of_trapezoids + 1};
     const auto dx{(x_max - x_min) / number_of_trapezoids};
     const auto half_dx{0.5 * dx}; // precomputed for area calculation
+    const auto dx_inner{dx / workload_factor};
+    const auto half_dx_inner{dx_inner / 2};
     // {{UnoAPI:main-domain-setup:end}}
 
     spdlog::info("integrating function from {} to {} using {} trapezoid(s), dx = {}", x_min, x_max, number_of_trapezoids, dx);
@@ -72,13 +76,12 @@ int main(const int argc, const char * const argv[]) {
         device_name = "sequential";
         std::vector values(size, 0.0);
         auto result{0.0};
-        const auto dx_inner{dx / workload_factor};
-        const auto half_dx_inner{dx_inner / 2};
 
         mark_time(timestamps,"Memory allocation");
         spdlog::info("starting sequential integration");
 
         // populate vector with function values and add trapezoid area to result
+        // the inner loop performs a finer-grained calculation
         values[0] += f(x_min);
         for (auto i{0UL}; i < number_of_trapezoids; i++) {
             auto inner{0.0};
@@ -109,6 +112,7 @@ int main(const int argc, const char * const argv[]) {
         // this allows the data to live on the device until accessed on the host (if desired)
         // {{UnoAPI:main-parallel-buffers:begin}}
         sycl::buffer<double> v_buf{sycl::range<1>{size}};
+        sycl::buffer<double> t_buf{sycl::range<1>{number_of_trapezoids}};
         sycl::buffer<double> r_buf{sycl::range<1>{1}};
         // {{UnoAPI:main-parallel-buffers:end}}
 
@@ -119,9 +123,9 @@ int main(const int argc, const char * const argv[]) {
         sycl::device device { run_cpuonly ? sycl::cpu_selector_v : sycl::default_selector_v };
         // {{UnoAPI:main-parallel-devices:end}}
 
-        // we use an in-order queue for this simple, sequential computation
+        // we allow the queue to figure out the correct ordering of the three tasks
         // {{UnoAPI:main-parallel-inorder-q:begin}}
-        sycl::queue q{device, dpc_common::exception_handler, sycl::property::queue::in_order()};
+        sycl::queue q{device, dpc_common::exception_handler};
         mark_time(timestamps,"Queue creation");
         device_name = q.get_device().get_info<sycl::info::device::name>();
         spdlog::info("Device: {}", device_name);
@@ -132,11 +136,25 @@ int main(const int argc, const char * const argv[]) {
         q.submit([&](auto & h) {
             const sycl::accessor v{v_buf, h};
             h.parallel_for(size, [=](const auto & index) {
-                v[index] = 0;
-                for (auto k = 0; k < workload_factor; k++) {
-                    v[index] += f(x_min + index * dx);
+                v[index] = f(x_min + index * dx);
+            });
+        }); // end of command group
+        // {{UnoAPI:main-parallel-submit-parallel-for:end}}
+
+        // populate buffer with trapezoid values
+        // the inner, sequential loop performs a finer-grained calculation
+        // {{UnoAPI:main-parallel-submit-parallel-for:begin}}
+        q.submit([&](auto & h) {
+            const sycl::accessor t{t_buf, h};
+            h.parallel_for(size, [=](const auto & index) {
+                auto inner{0.0};
+                auto y_left{f(x_min + index * dx)};
+                for (auto j{0UL}; j < workload_factor; j++) {
+                    auto y_right{f(x_min + index * dx + (j + 1) * dx_inner)};
+                    inner += trapezoid(y_left, y_right, half_dx_inner);
+                    y_left = y_right;
                 }
-                v[index] /= workload_factor;
+                t[index] = inner;
             });
         }); // end of command group
         // {{UnoAPI:main-parallel-submit-parallel-for:end}}
@@ -144,10 +162,10 @@ int main(const int argc, const char * const argv[]) {
         // perform reduction into result
         // {{UnoAPI:main-parallel-submit-reduce:begin}}
         q.submit([&](auto & h) {
-            const sycl::accessor v{v_buf, h};
+            const sycl::accessor t{t_buf, h};
             const auto sum_reduction{sycl::reduction(r_buf, h, sycl::plus<>())};
             h.parallel_for(sycl::range<1>{number_of_trapezoids}, sum_reduction, [=](const auto & index, auto & sum) {
-                sum.combine(trapezoid(v[index], v[index + 1], half_dx));
+                sum.combine(t[index]);
             });
         }); // end of command group
         // {{UnoAPI:main-parallel-submit-reduce:end}}

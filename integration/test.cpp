@@ -40,6 +40,6 @@ TEST_F(IntegrationTest, Simple3) {
 
 // {{UnoAPI:integration-test-f1:begin}}
 TEST_F(IntegrationTest, F1) {
-    EXPECT_NEAR(f(0.5), 1, EPS);
+    EXPECT_NEAR(f(0.5), 0.75, EPS);
 }
 // {{UnoAPI:integration-test-f1:end}}
