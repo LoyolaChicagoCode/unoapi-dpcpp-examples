@@ -24,7 +24,8 @@ template <class Indexable> void print_function_values(const Indexable & values, 
 
 int main(const int argc, const char * const argv[]) {
     // {{UnoAPI:main-declarations:begin}}
-    size_t number_of_trapezoids{10};
+    size_t total_workload{1000};
+    uint grain_size{100};
     double x_min{0.0};
     double x_max{1.0};
     bool show_function_values{false};
@@ -32,7 +33,6 @@ int main(const int argc, const char * const argv[]) {
     bool run_cpuonly{false};
     uint x_precision{1};
     uint y_precision{1};
-    uint workload_factor{1};
     std::string perf_output;
     ts_vector timestamps;
     std::string device_name;
@@ -41,13 +41,13 @@ int main(const int argc, const char * const argv[]) {
     // {{UnoAPI:main-cli-setup-and-parse:begin}}
     CLI::App app{"Trapezoidal integration"};
     app.option_defaults()->always_capture_default(true);
-    app.add_option("-n,--trapezoids", number_of_trapezoids, "number of outer (parallel) trapezoids")->check(CLI::PositiveNumber.description(" >= 1"));
     app.add_option("-l,--lower,--xmin", x_min, "x min value");
     app.add_option("-u,--upper,--xmax", x_max, "x max value");
-    app.add_flag("-v,--show-function-values", show_function_values);
+    app.add_option("-n,--total-workload", total_workload, "total workload (number of trapezoids)")->check(CLI::PositiveNumber.description(" >= 1"));
+    app.add_option("-g,--grain-size", grain_size, "number of inner (sequential) trapezoids (for each outer trapezoid)")->check(CLI::PositiveNumber.description(" >= 1"));
     app.add_flag("-s,--sequential", run_sequentially);
     app.add_flag("-c,--cpu-only", run_cpuonly);
-    app.add_option("-w,--workload-factor", workload_factor, "number of inner (sequential) trapezoids (for each outer trapezoid)")->check(CLI::PositiveNumber.description(" >= 1"));
+    app.add_flag("-v,--show-function-values", show_function_values);
     app.add_option("-x,--x-format-precision", x_precision, "decimal precision for x values")->check(CLI::PositiveNumber.description(" >= 1"));
     app.add_option("-y,--y-format-precision", y_precision, "decimal precision for y (function) values")->check(CLI::PositiveNumber.description(" >= 1"));
     app.add_option("-p,--perfdata-output-file", perf_output, "output file for performance data");
@@ -59,16 +59,21 @@ int main(const int argc, const char * const argv[]) {
         spdlog::error("invalid range: [{}, {}]", x_min, x_max);
         return 1;
     }
+
+    if (total_workload % grain_size != 0) {
+        spdlog::warn("total workload {} is not a multiple of grain size {}", total_workload, grain_size);
+    }
     
     // {{UnoAPI:main-domain-setup:begin}}
+    size_t number_of_trapezoids{total_workload / grain_size};
     const auto size{number_of_trapezoids + 1};
     const auto dx{(x_max - x_min) / number_of_trapezoids};
     const auto half_dx{0.5 * dx}; // precomputed for area calculation
-    const auto dx_inner{dx / workload_factor};
+    const auto dx_inner{dx / grain_size};
     const auto half_dx_inner{dx_inner / 2};
     // {{UnoAPI:main-domain-setup:end}}
 
-    spdlog::info("integrating function from {} to {} using {} trapezoid(s), dx = {}", x_min, x_max, number_of_trapezoids, dx);
+    spdlog::info("integrating function from {} to {} using {} trapezoid(s) with grain size {}, dx = {}", x_min, x_max, total_workload, grain_size, dx);
     mark_time(timestamps, "Start");
 
     // {{UnoAPI:main-sequential-option:begin}}
@@ -86,7 +91,7 @@ int main(const int argc, const char * const argv[]) {
         for (auto i{0UL}; i < number_of_trapezoids; i++) {
             auto inner{0.0};
             auto y_left{f(x_min + i * dx)};
-            for (auto j{0UL}; j < workload_factor; j++) {
+            for (auto j{0UL}; j < grain_size; j++) {
                 auto y_right{f(x_min + i * dx + (j + 1) * dx_inner)};
                 inner += trapezoid(y_left, y_right, half_dx_inner);
                 y_left = y_right;
@@ -149,7 +154,7 @@ int main(const int argc, const char * const argv[]) {
             h.parallel_for(size, [=](const auto & index) {
                 auto inner{0.0};
                 auto y_left{f(x_min + index * dx)};
-                for (auto j{0UL}; j < workload_factor; j++) {
+                for (auto j{0UL}; j < grain_size; j++) {
                     auto y_right{f(x_min + index * dx + (j + 1) * dx_inner)};
                     inner += trapezoid(y_left, y_right, half_dx_inner);
                     y_left = y_right;
