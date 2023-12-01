@@ -111,3 +111,5 @@ build-*/
 processtree-*
 \#*
 .vscode/
+
+nvidia-perf-*.txt
