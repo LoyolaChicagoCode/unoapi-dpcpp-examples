@@ -1,7 +1,15 @@
 #!/usr/bin/bash
 
-for n in 10 100 1000 10000 100000 1000000 10000000 100000000 1000000000; do
-    for w in 1 10 100 1000 10000; do
-	echo $n,$w,$(grep TOTAL nvidia-perf-$n-$w.txt | cut -d, -f2)
-    done
+# extracts the specified row from all raw performance data files
+# (default: TOTAL)
+
+row=${1:-TOTAL}
+prefix=nvidia-perf-
+
+for f in ${prefix}*.txt; do
+    x=${f#$prefix}
+    n=${x%-*}
+    g=${x#*-}
+    g=${g%.txt}
+    echo $n,$g,$(grep $row $f | cut -d, -f2)
 done
