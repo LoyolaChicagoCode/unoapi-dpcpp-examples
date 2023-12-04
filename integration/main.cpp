@@ -14,13 +14,34 @@
 
 // {{UnoAPI:main-print-function-values:begin}}
 // function template to avoid code repetition (DRY)
-// works as long as the first argument has a size() method and an indexing operator[]
+// works as long as the first argument has a size()
+// method and an indexing operator[]
 template <class Indexable> void print_function_values(const Indexable & values, const double x_min, const double dx, const uint x_precision, const uint y_precision) {
     for (auto i{0UL}; i < values.size(); i++) {
         fmt::print("{}: f({:.{}f}) = {:.{}f}\n", i, x_min + i * dx, x_precision, values[i], y_precision);
     }
 }
 // {{UnoAPI:main-print-function-values:end}}
+
+// {{UnoAPI:main-compute-outer-trapezoid:begin}}
+// common function to compute a single outer trapezoid
+// from as many inner trapezoids as the grain size
+inline double compute_outer_trapezoid(
+    const int grain_size,
+    const double x_pos,
+    const double dx_inner,
+    const double half_dx_inner
+) {
+    auto area{0.0};
+    auto y_left{f(x_pos)};
+    for (auto j{0UL}; j < grain_size; j++) {
+        auto y_right{f(x_pos + (j + 1) * dx_inner)};
+        area += trapezoid(y_left, y_right, half_dx_inner);
+        y_left = y_right;
+    }
+    return area;
+}
+// {{UnoAPI:main-compute-outer-trapezoid:end}}
 
 int main(const int argc, const char * const argv[]) {
     // {{UnoAPI:main-declarations:begin}}
@@ -70,7 +91,7 @@ int main(const int argc, const char * const argv[]) {
     const auto dx{(x_max - x_min) / number_of_trapezoids};
     const auto half_dx{0.5 * dx}; // precomputed for area calculation
     const auto dx_inner{dx / grain_size};
-    const auto half_dx_inner{dx_inner / 2};
+    const auto half_dx_inner{0.5 * dx_inner};
     // {{UnoAPI:main-domain-setup:end}}
 
     spdlog::info("integrating function from {} to {} using {} trapezoid(s) with grain size {}, dx = {}", x_min, x_max, total_workload, grain_size, dx);
@@ -89,15 +110,9 @@ int main(const int argc, const char * const argv[]) {
         // the inner loop performs a finer-grained calculation
         values[0] += f(x_min);
         for (auto i{0UL}; i < number_of_trapezoids; i++) {
-            auto inner{0.0};
-            auto y_left{f(x_min + i * dx)};
-            for (auto j{0UL}; j < grain_size; j++) {
-                auto y_right{f(x_min + i * dx + (j + 1) * dx_inner)};
-                inner += trapezoid(y_left, y_right, half_dx_inner);
-                y_left = y_right;
-            }
-            values[i + 1] = y_left;
-            result += inner;
+            const auto x_pos{x_min + i * dx};
+            result += compute_outer_trapezoid(grain_size, x_pos, dx_inner, half_dx_inner);
+            values[i + 1] = f(x_pos);
         }
 
         mark_time(timestamps, "Integration");
@@ -152,14 +167,7 @@ int main(const int argc, const char * const argv[]) {
         q.submit([&](auto & h) {
             const sycl::accessor t{t_buf, h};
             h.parallel_for(size, [=](const auto & index) {
-                auto inner{0.0};
-                auto y_left{f(x_min + index * dx)};
-                for (auto j{0UL}; j < grain_size; j++) {
-                    auto y_right{f(x_min + index * dx + (j + 1) * dx_inner)};
-                    inner += trapezoid(y_left, y_right, half_dx_inner);
-                    y_left = y_right;
-                }
-                t[index] = inner;
+                t[index] = compute_outer_trapezoid(grain_size, x_min + index * dx, dx_inner, half_dx_inner);
             });
         }); // end of command group
         // {{UnoAPI:main-parallel-submit-parallel-for:end}}
