@@ -26,7 +26,7 @@ template <class Indexable> void print_function_values(const Indexable & values, 
 // {{UnoAPI:main-compute-outer-trapezoid:begin}}
 // common function to compute a single outer trapezoid
 // from as many inner trapezoids as the grain size
-inline double compute_outer_trapezoid(
+double compute_outer_trapezoid(
     const int grain_size,
     const double x_pos,
     const double dx_inner,
