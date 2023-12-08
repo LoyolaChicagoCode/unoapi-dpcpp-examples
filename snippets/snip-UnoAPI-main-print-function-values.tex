@@ -1,6 +1,7 @@
-\begin{cppcode*}{firstnumber=13}
+\begin{cppcode*}{firstnumber=16}
 // function template to avoid code repetition (DRY)
-// works as long as the first argument has a size() method and an indexing operator[]
+// works as long as the first argument has a size()
+// method and an indexing operator[]
 template <class Indexable> void print_function_values(const Indexable & values, const double x_min, const double dx, const uint x_precision, const uint y_precision) {
     for (auto i{0UL}; i < values.size(); i++) {
         fmt::print("{}: f({:.{}f}) = {:.{}f}\n", i, x_min + i * dx, x_precision, values[i], y_precision);

@@ -1,8 +1,10 @@
-\begin{cppcode*}{firstnumber=144}
+\begin{cppcode*}{firstnumber=196}
         if (show_function_values) {
             spdlog::info("preparing function values");
             const sycl::host_accessor values{v_buf};
+            mark_time(timestamps,"Host data access");
             spdlog::info("showing function values");
             print_function_values(values, x_min, dx, x_precision, y_precision);
+            mark_time(timestamps,"Output");
         }
 \end{cppcode*}

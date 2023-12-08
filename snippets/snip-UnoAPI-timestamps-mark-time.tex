@@ -1,0 +1,5 @@
+\begin{cppcode*}{firstnumber=7}
+void mark_time(ts_vector & timestamps, const std::string_view label) {
+    timestamps.push_back(std::pair(label.data(), std::chrono::steady_clock::now()));
+}
+\end{cppcode*}

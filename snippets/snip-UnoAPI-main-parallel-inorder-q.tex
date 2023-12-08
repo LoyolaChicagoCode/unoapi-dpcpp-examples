@@ -1,4 +1,6 @@
-\begin{cppcode*}{firstnumber=110}
-        sycl::queue q{device, dpc_common::exception_handler, sycl::property::queue::in_order()};
-        spdlog::info("Device: {}", q.get_device().get_info<sycl::info::device::name>());
+\begin{cppcode*}{firstnumber=148}
+        sycl::queue q{device, dpc_common::exception_handler};
+        mark_time(timestamps,"Queue creation");
+        device_name = q.get_device().get_info<sycl::info::device::name>();
+        spdlog::info("Device: {}", device_name);
 \end{cppcode*}

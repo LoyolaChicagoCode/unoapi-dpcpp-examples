@@ -1,5 +1,6 @@
-\begin{cppcode*}{firstnumber=138}
+\begin{cppcode*}{firstnumber=189}
         const sycl::host_accessor result{r_buf};
+        mark_time(timestamps,"Integration");
         spdlog::info("result should be available now");
         fmt::print("result = {}\n", result[0]);
 \end{cppcode*}

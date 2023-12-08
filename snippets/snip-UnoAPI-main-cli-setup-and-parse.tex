@@ -1,14 +1,16 @@
-\begin{cppcode*}{firstnumber=36}
+\begin{cppcode*}{firstnumber=63}
     CLI::App app{"Trapezoidal integration"};
     app.option_defaults()->always_capture_default(true);
-    app.add_option("-n,--trapezoids", number_of_trapezoids, "number of trapezoids")->check(CLI::PositiveNumber.description(" >= 1"));
     app.add_option("-l,--lower,--xmin", x_min, "x min value");
     app.add_option("-u,--upper,--xmax", x_max, "x max value");
-    app.add_flag("-v,--show-function-values", show_function_values);
+    app.add_option("-n,--total-workload", total_workload, "total workload (number of trapezoids)")->check(CLI::PositiveNumber.description(" >= 1"));
+    app.add_option("-g,--grain-size", grain_size, "number of inner (sequential) trapezoids (for each outer trapezoid)")->check(CLI::PositiveNumber.description(" >= 1"));
     app.add_flag("-s,--sequential", run_sequentially);
     app.add_flag("-c,--cpu-only", run_cpuonly);
+    app.add_flag("-v,--show-function-values", show_function_values);
     app.add_option("-x,--x-format-precision", x_precision, "decimal precision for x values")->check(CLI::PositiveNumber.description(" >= 1"));
     app.add_option("-y,--y-format-precision", y_precision, "decimal precision for y (function) values")->check(CLI::PositiveNumber.description(" >= 1"));
+    app.add_option("-p,--perfdata-output-file", perf_output, "output file for performance data");
 
     CLI11_PARSE(app, argc, argv);
 \end{cppcode*}

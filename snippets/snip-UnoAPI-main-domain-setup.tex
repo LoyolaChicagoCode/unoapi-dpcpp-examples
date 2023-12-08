@@ -1,5 +1,8 @@
-\begin{cppcode*}{firstnumber=57}
+\begin{cppcode*}{firstnumber=89}
+    size_t number_of_trapezoids{total_workload / grain_size};
     const auto size{number_of_trapezoids + 1};
     const auto dx{(x_max - x_min) / number_of_trapezoids};
     const auto half_dx{0.5 * dx}; // precomputed for area calculation
+    const auto dx_inner{dx / grain_size};
+    const auto half_dx_inner{0.5 * dx_inner};
 \end{cppcode*}

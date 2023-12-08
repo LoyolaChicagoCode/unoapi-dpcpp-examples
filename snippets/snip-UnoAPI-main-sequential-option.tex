@@ -1,23 +1,29 @@
-\begin{cppcode*}{firstnumber=65}
+\begin{cppcode*}{firstnumber=101}
     if (run_sequentially) {
+        device_name = "sequential";
         std::vector values(size, 0.0);
-        double result{0.0};
+        auto result{0.0};
 
+        mark_time(timestamps,"Memory allocation");
         spdlog::info("starting sequential integration");
 
         // populate vector with function values and add trapezoid area to result
-        values[0] = f(x_min);
+        // the inner loop performs a finer-grained calculation
+        values[0] += f(x_min);
         for (auto i{0UL}; i < number_of_trapezoids; i++) {
-            values[i + 1] = f(x_min + i * dx);
-            result += trapezoid(values[i], values[i + 1], half_dx);
+            const auto x_pos{x_min + i * dx};
+            result += compute_outer_trapezoid(grain_size, x_pos, dx_inner, half_dx_inner);
+            values[i + 1] = f(x_pos);
         }
 
+        mark_time(timestamps, "Integration");
         spdlog::info("result should be available now");
         fmt::print("result = {}\n", result);
 
         if (show_function_values) {
             spdlog::info("showing function values");
             print_function_values(values, x_min, dx, x_precision, y_precision);
+            mark_time(timestamps, "Output");
         }
     }
 \end{cppcode*}
