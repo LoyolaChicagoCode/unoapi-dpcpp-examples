@@ -26,7 +26,7 @@ template <class Indexable> void print_function_values(const Indexable & values, 
 // {{UnoAPI:main-compute-outer-trapezoid:begin}}
 // common function to compute a single outer trapezoid
 // from as many inner trapezoids as the grain size
-double compute_outer_trapezoid(
+double outer_trapezoid(
     const int grain_size,
     const double x_pos,
     const double dx_inner,
@@ -36,7 +36,7 @@ double compute_outer_trapezoid(
     auto y_left{f(x_pos)};
     for (auto j{0UL}; j < grain_size; j++) {
         auto y_right{f(x_pos + (j + 1) * dx_inner)};
-        area += trapezoid(y_left, y_right, half_dx_inner);
+        area += single_trapezoid(y_left, y_right, half_dx_inner);
         y_left = y_right;
     }
     return area;
@@ -111,7 +111,7 @@ int main(const int argc, const char * const argv[]) {
         values[0] += f(x_min);
         for (auto i{0UL}; i < number_of_trapezoids; i++) {
             const auto x_pos{x_min + i * dx};
-            result += compute_outer_trapezoid(grain_size, x_pos, dx_inner, half_dx_inner);
+            result += outer_trapezoid(grain_size, x_pos, dx_inner, half_dx_inner);
             values[i + 1] = f(x_pos);
         }
 
@@ -167,7 +167,7 @@ int main(const int argc, const char * const argv[]) {
         q.submit([&](auto & h) {
             const sycl::accessor t{t_buf, h};
             h.parallel_for(size, [=](const auto & index) {
-                t[index] = compute_outer_trapezoid(grain_size, x_min + index * dx, dx_inner, half_dx_inner);
+                t[index] = outer_trapezoid(grain_size, x_min + index * dx, dx_inner, half_dx_inner);
             });
         }); // end of command group
         // {{UnoAPI:main-parallel-submit-parallel-for-trapezoids:end}}
