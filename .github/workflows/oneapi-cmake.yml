@@ -1,4 +1,3 @@
-
 name: OneAPI CI with CMake
 
 on:
@@ -14,6 +13,7 @@ jobs:
     env:
       BUILD_DIR: cmake-build-debug
 
+# UnoAPI:github-workflow-specific:begin
     steps:
     - name: Checkout project code
       uses: actions/checkout@v2
@@ -42,3 +42,4 @@ jobs:
         $BUILD_DIR/bin/montecarlo
         # eventually keep only this loop for discovering all tests
         for test_bin in $BUILD_DIR/bin/*tests; do "./$test_bin"; done
+# UnoAPI:github-workflow-specific:end

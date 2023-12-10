@@ -144,33 +144,33 @@ int main(const int argc, const char * const argv[]) {
         // {{UnoAPI:main-parallel-devices:end}}
 
         // we allow the queue to figure out the correct ordering of the three tasks
-        // {{UnoAPI:main-parallel-inorder-q:begin}}
+        // {{UnoAPI:main-parallel-queue:begin}}
         sycl::queue q{device, dpc_common::exception_handler};
         mark_time(timestamps,"Queue creation");
         device_name = q.get_device().get_info<sycl::info::device::name>();
         spdlog::info("Device: {}", device_name);
-        // {{UnoAPI:main-parallel-inorder-q:end}}
+        // {{UnoAPI:main-parallel-queue:end}}
 
         // populate buffer with function values
-        // {{UnoAPI:main-parallel-submit-parallel-for:begin}}
+        // {{UnoAPI:main-parallel-submit-parallel-for-values:begin}}
         q.submit([&](auto & h) {
             const sycl::accessor v{v_buf, h};
             h.parallel_for(size, [=](const auto & index) {
                 v[index] = f(x_min + index * dx);
             });
         }); // end of command group
-        // {{UnoAPI:main-parallel-submit-parallel-for:end}}
+        // {{UnoAPI:main-parallel-submit-parallel-for-values:end}}
 
         // populate buffer with trapezoid values
         // the inner, sequential loop performs a finer-grained calculation
-        // {{UnoAPI:main-parallel-submit-parallel-for:begin}}
+        // {{UnoAPI:main-parallel-submit-parallel-for-trapezoids:begin}}
         q.submit([&](auto & h) {
             const sycl::accessor t{t_buf, h};
             h.parallel_for(size, [=](const auto & index) {
                 t[index] = compute_outer_trapezoid(grain_size, x_min + index * dx, dx_inner, half_dx_inner);
             });
         }); // end of command group
-        // {{UnoAPI:main-parallel-submit-parallel-for:end}}
+        // {{UnoAPI:main-parallel-submit-parallel-for-trapezoids:end}}
 
         // perform reduction into result
         // {{UnoAPI:main-parallel-submit-reduce:begin}}
