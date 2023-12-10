@@ -142,7 +142,7 @@ int main(const int argc, const char *const argv[]) {
             }
         }
     } else {
-        sycl::queue q{sycl::default_selector{}, dpc_common::exception_handler};
+        sycl::queue q{sycl::default_selector_v, dpc_common::exception_handler};
         spdlog::info("Device: {}", q.get_device().get_info<sycl::info::device::name>());
 
         sycl::buffer<std::string_view> w_buf{nullptr, sycl::range<1>(words.size())};//{words.data(), sycl::range<1>(words.size())};

@@ -36,7 +36,7 @@ int main(const int argc, const char *const argv[]) {
     uint64_t sum{0};
 
     {
-        sycl::queue q{sycl::default_selector{}, dpc_common::exception_handler};
+        sycl::queue q{sycl::default_selector_v, dpc_common::exception_handler};
         sycl::buffer<uint64_t> c_buf{counts.data(), sycl::range<1>(counts.size())};
         sycl::buffer<uint64_t> s_buf{&sum, 1};
 
