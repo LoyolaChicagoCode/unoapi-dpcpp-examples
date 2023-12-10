@@ -23,26 +23,6 @@ template <class Indexable> void print_function_values(const Indexable & values, 
 }
 // {{UnoAPI:main-print-function-values:end}}
 
-// {{UnoAPI:main-compute-outer-trapezoid:begin}}
-// common function to compute a single outer trapezoid
-// from as many inner trapezoids as the grain size
-double outer_trapezoid(
-    const int grain_size,
-    const double x_pos,
-    const double dx_inner,
-    const double half_dx_inner
-) {
-    auto area{0.0};
-    auto y_left{f(x_pos)};
-    for (auto j{0UL}; j < grain_size; j++) {
-        auto y_right{f(x_pos + (j + 1) * dx_inner)};
-        area += single_trapezoid(y_left, y_right, half_dx_inner);
-        y_left = y_right;
-    }
-    return area;
-}
-// {{UnoAPI:main-compute-outer-trapezoid:end}}
-
 int main(const int argc, const char * const argv[]) {
     // {{UnoAPI:main-declarations:begin}}
     size_t total_workload{1000};

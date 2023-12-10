@@ -19,7 +19,6 @@ protected:
 };
 // {{UnoAPI:integration-test-scaffolding:end}}
 
-
 // {{UnoAPI:integration-test-simple1:begin}}
 TEST_F(IntegrationTest, Simple1) {
     EXPECT_NEAR(single_trapezoid(1, 1, 0.5), 1, EPS);
@@ -43,3 +42,16 @@ TEST_F(IntegrationTest, F1) {
     EXPECT_NEAR(f(0.5), 0.75, EPS);
 }
 // {{UnoAPI:integration-test-f1:end}}
+
+// double outer_trapezoid(
+//     const int grain_size,
+//     const double x_pos,
+//     const double dx_inner,
+//     const double half_dx_inner
+// )
+
+// {{UnoAPI:integration-test-outer1:begin}}
+TEST_F(IntegrationTest, Outer1) {
+    EXPECT_NEAR(outer_trapezoid(1000, 0.0, 0.001, 0.0005), 1, EPS);
+}
+// {{UnoAPI:integration-test-outer1:end}}
