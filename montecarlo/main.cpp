@@ -43,6 +43,7 @@ int main(const int argc, const char *const argv[]) {
         spdlog::info("Device: {}", q.get_device().get_info<sycl::info::device::name>());
         spdlog::info("Max workgroup size: {}", q.get_device().get_info<sycl::info::device::max_work_group_size>());
 
+        // {{UnoAPI:montecarlo-queue-dart-throwing:begin}}
         q.submit([&](auto &h) {
             const auto c = c_buf.get_access<sycl::access_mode::write>(h);
 
@@ -68,7 +69,9 @@ int main(const int argc, const char *const argv[]) {
                 c[index] = darts_within_circle;
             });
         });
+        // {{UnoAPI:montecarlo-queue-dart-throwing:end}}
 
+        // {{UnoAPI:montecarlo-queue-reduce:begin}}
         q.submit([&](auto &h) {
             const auto c{c_buf.get_access<sycl::access_mode::read>(h)};
             const auto sum_reduction{sycl::reduction(s_buf, h, sycl::plus<>())};
@@ -77,6 +80,7 @@ int main(const int argc, const char *const argv[]) {
                 sum.combine(c[index]);
             });
         });
+        // {{UnoAPI:montecarlo-queue-reduce:end}}
 
         spdlog::info("done submitting to queue...waiting for results");
     }

@@ -7,7 +7,7 @@ double single_trapezoid(const double f1, const double f2, const double half_dx) 
 }
 // {{UnoAPI:trapezoid-implementation:end}}
 
-// {{UnoAPI:main-compute-outer-trapezoid:begin}}
+// {{UnoAPI:trapezoid-compute-outer:begin}}
 // common function to compute a single outer trapezoid
 // from as many inner trapezoids as the grain size
 double outer_trapezoid(
@@ -25,4 +25,4 @@ double outer_trapezoid(
     }
     return area;
 }
-// {{UnoAPI:main-compute-outer-trapezoid:end}}
+// {{UnoAPI:trapezoid-compute-outer:end}}
