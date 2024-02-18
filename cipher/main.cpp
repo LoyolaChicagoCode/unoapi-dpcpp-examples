@@ -16,6 +16,10 @@
  * + refactor variable naming convention
  * + add logging and time
  * + use name space
+ * + read msg from file.txt or std input
+ * + support command line options and arguments
+ * + implement decrypt
+ * + choice of running sequential or parall_for
  *
  * */
 
@@ -23,7 +27,7 @@
 
 
 // consts
-const std::string msg{"abcd"};
+const std::string msg{"abcdefgh"};
 const auto size = msg.size();
 
 const std::string key{"dogs"};
