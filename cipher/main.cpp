@@ -5,46 +5,11 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 
 #include <sycl/sycl.hpp>
-#include <iostream>
 #include <dpc_common.hpp>
 
-// including for scramble
 #include <iostream>
 #include <vector>
-#include <list>
-
-
-std::vector<char> scramble(const std::string& key, const int key_size, const std::string& msg, const int msg_size, const int ascii_a, const int range);
-std::vector<char> scramble(const std::string& key, const int key_size, const std::string& msg, const int msg_size, const int ascii_a, const int range)
-{
-    // TODO: I need to check for duplicate characters and remove them from key.
-    
-    // declarations
-    std::list<char> alphabet;
-    std::vector<char> v1;
-    
-    // initializing alphabet
-    auto ascii_value = ascii_a;
-    for (int i = 0; i < range; i++) {
-        char element = char(ascii_value);
-        alphabet.push_back(element);
-        ascii_value++;
-    }
-    
-    // writing out keyword
-    for (int i = 0; i < key_size; i++) {
-        v1.push_back(key[i]);
-        alphabet.remove(key[i]);
-    }
-    
-    // writing out remaining characters
-    for (int i = 0; i < (range-key_size); i++) {
-        char element = alphabet.front();
-        v1.push_back(element);
-        alphabet.pop_front();
-    }     
-    return v1;
-}
+#include "scramble.h"
 
 
 int main(const int argc, const char *const argv[])
@@ -53,6 +18,7 @@ int main(const int argc, const char *const argv[])
     std::string msg{"abcdefg"};
     std::string key{"dogs"};
     bool run_sequentially{false};
+    std::string text_file;
     // {{UnoAPI:main-declarations:end}}
 
     // {{UnoAPI:main-cli-setup-and-parse:begin}}
@@ -61,6 +27,7 @@ int main(const int argc, const char *const argv[])
     app.add_option("-k, --key", key, "key value");
     app.add_option("-m, --msg", msg, "message");
     app.add_flag("-s, --sequential", run_sequentially);
+
     CLI11_PARSE(app, argc, argv);
     //{{UnoAPI:main-cli-setup-and-parse:end}}
 
@@ -82,7 +49,7 @@ int main(const int argc, const char *const argv[])
     // bound-checks:end
 
     if (run_sequentially) {
-        std::cout << "run sequentially not yet implemented";
+        std::cout << "run sequentially not yet implemented" << std::endl;
         return 0;
     }
 
