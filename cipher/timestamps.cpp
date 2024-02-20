@@ -1,0 +1,35 @@
+#include <cstdio>
+#include <fmt/format.h>
+
+#include "timestamps.h"
+
+// {{UnoAPI:timestamps-mark-time:begin}}
+void mark_time(ts_vector & timestamps, const std::string_view label) {
+    timestamps.push_back(std::pair(label.data(), std::chrono::steady_clock::now()));
+}
+// {{UnoAPI:timestamps-mark-time:end}}
+
+// {{UnoAPI:timestamps-print-timestamps:begin}}
+void print_timestamps(const ts_vector & timestamps, const std::string_view filename, const std::string_view device_name) {
+    using std::chrono::nanoseconds;
+    using std::chrono::duration_cast;
+
+    constexpr auto ROW_HEADER{"TIME,DELTA,UNIT,DEVICE,PHASE\n"};
+    constexpr auto ROW_FORMAT{"{},{},{},{},{}\n"};
+    constexpr auto TIME_UNIT{"ns"};
+
+    const auto & start = timestamps.front().second;
+    auto outfile = filename.empty() ? stdout : std::fopen(filename.data(), "w");
+    fmt::print(outfile, ROW_HEADER);
+    fmt::print(outfile, ROW_FORMAT, duration_cast<nanoseconds>(start.time_since_epoch()).count(), 0, TIME_UNIT, device_name, timestamps.front().first);
+    for (auto t = timestamps.begin() + 1; t != timestamps.end(); t++) {
+        const auto dur{duration_cast<nanoseconds>(t->second - (t - 1)->second).count()};
+        fmt::print(outfile, ROW_FORMAT, duration_cast<nanoseconds>(t->second.time_since_epoch()).count(), dur, TIME_UNIT, device_name, t->first);
+    }
+    const auto & stop{timestamps.back().second};
+    const auto total{duration_cast<nanoseconds>(stop - start).count()};
+    fmt::print(outfile, ROW_FORMAT, duration_cast<nanoseconds>(stop.time_since_epoch()).count(), total, TIME_UNIT, device_name, "TOTAL");
+    if (! filename.empty())
+        std::fclose(outfile);
+}
+// {{UnoAPI:timestamps-print-timestamps:end}}
