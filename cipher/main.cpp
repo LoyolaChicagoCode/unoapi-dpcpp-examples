@@ -14,6 +14,7 @@
 
 #include "scramble.h"
 #include "timestamps.h"
+#include "readfile.h"
 
 
 int main(const int argc, const char *const argv[])
@@ -33,10 +34,18 @@ int main(const int argc, const char *const argv[])
     app.option_defaults()->always_capture_default(true);
     app.add_option("-k, --key", key, "key value");
     app.add_option("-m, --msg", msg, "message");
+    app.add_option("-f, --file", text_file)
+        ->check(CLI::ExistingFile);
     app.add_flag("-s, --sequential", run_sequentially);
 
     CLI11_PARSE(app, argc, argv);
     //{{UnoAPI:main-cli-setup-and-parse:end}}
+
+    // if file option, then load contents of file to string::msg
+    if (text_file.size() > 0) {
+        msg = file_to_string(text_file);
+    }
+
 
     // {{UnoAPI:main-domain-setup:begin}}
     const auto key_size = key.size();
@@ -111,17 +120,17 @@ int main(const int argc, const char *const argv[])
 
         spdlog::info("printing plaintext, key, ciphertext");
         /* printing plaintext */
-        std::cout << "plaintext = " << msg;
-        std::cout << std::endl;
+        //std::cout << "plaintext = " << msg;
+        //std::cout << std::endl;
         /* printing keys */
-        std::cout << "key = " << key;
-        std::cout << std::endl;
+        //std::cout << "key = " << key;
+        //std::cout << std::endl;
         /* printing ciphertext */
-        std::cout << "ciphertext = ";
-        for (size_t i = 0; i < result.size(); i++) {
-            std::cout << result[i];
-        }
-        std::cout << std::endl;
+        //std::cout << "ciphertext = ";
+        //for (size_t i = 0; i < result.size(); i++) {
+        //    std::cout << result[i];
+        //}
+        //std::cout << std::endl;
         mark_time(timestamps,"Output");
     }
     mark_time(timestamps, "DONE");
