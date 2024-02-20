@@ -1,6 +1,3 @@
-// the encoding function was moved to a header file
-
-// including for main
 #include <CLI/CLI.hpp>
 #include <fmt/format.h>
 #include <spdlog/spdlog.h>
@@ -24,7 +21,7 @@ int main(const int argc, const char *const argv[])
     std::string key{"dogs"};
     std::string perf_output;
     bool run_sequentially{false};
-    std::string text_file;
+    std::string text_file_path;
     ts_vector timestamps;
     std::string device_name;
     // {{UnoAPI:main-declarations:end}}
@@ -34,60 +31,55 @@ int main(const int argc, const char *const argv[])
     app.option_defaults()->always_capture_default(true);
     app.add_option("-k, --key", key, "key value");
     app.add_option("-m, --msg", msg, "message");
-    app.add_option("-f, --file", text_file)
+    app.add_option("-f, --file", text_file_path)
         ->check(CLI::ExistingFile);
     app.add_flag("-s, --sequential", run_sequentially);
-
     CLI11_PARSE(app, argc, argv);
     //{{UnoAPI:main-cli-setup-and-parse:end}}
 
     // if file option, then load contents of file to string::msg
-    if (text_file.size() > 0) {
-        msg = file_to_string(text_file);
+    if (text_file_path.size() > 0) {
+        msg = file_to_string(text_file_path);
     }
-
+    // end reading file to msg
 
     // {{UnoAPI:main-domain-setup:begin}}
     const auto key_size = key.size();
     const auto msg_size = msg.size();
     const auto ascii_a{97};
-    const auto range{26};
+    const auto alphabet_range{26};
     // {{UnoAPI:main-domain-setup:end}}
 
-    // bound-checks:begin
-    if (msg_size <= 0) {
-        spdlog::error("invalid msg size");
-    }
-
-    if (key_size <= 0) {
-        spdlog::error("invalid key size");
-    }
-    // bound-checks:end
     mark_time(timestamps, "Start");
 
-
+    // {{UnoAPI:main-sequential-option:begin}}
     if (run_sequentially) {
-	device_name = "sequential";
-	std::vector<char> v1 = scramble(key, key_size, msg, msg_size, ascii_a, range);
+        device_name = "sequential";
+	std::vector<char> cipher_alphabet = scramble(key, key_size, ascii_a, alphabet_range);
 	std::vector<char> result(msg_size);
 	mark_time(timestamps,"Scramble alphabet");
+
+
 	spdlog::info("starting sequential encoding");
 	for (int i = 0; i < msg_size; i++) {
-	    result[i] = v1[msg[i] - ascii_a];
+	    result[i] = cipher_alphabet[msg[i] - ascii_a];
 	}
 	mark_time(timestamps,"encoding plaintext");
+
+
 	spdlog::info("results should be available now");
 	//fmt::print("ciphertext = {}\n", result);
     }
-    else {
+    // {{UnoAPI:main-sequential-option:end}}
 
-        std::vector<char> v1 = scramble(key, key_size, msg, msg_size, ascii_a, range);
+    else {
+        std::vector<char> cipher_alphabet = scramble(key, key_size, ascii_a, alphabet_range);
         mark_time(timestamps, "Scramble alphabet");
         spdlog::info("prepared ciphertext alphabet");
 
 
         sycl::buffer<char> msg_buf{msg.data(), sycl::range<1>{msg_size}};
-        sycl::buffer<char> cipher_alphabet_buf{v1.data(), sycl::range<1>{range}};
+        sycl::buffer<char> cipher_alphabet_buf{cipher_alphabet.data(), sycl::range<1>{alphabet_range}};
         sycl::buffer<char> result_buf{sycl::range<1>{msg_size}};
         mark_time(timestamps, "Memmory allocation");
         spdlog::info("starting parallel encoding");
@@ -111,10 +103,10 @@ int main(const int argc, const char *const argv[])
         });
         spdlog::info("done submitting to queue...waiting for results");
         mark_time(timestamps,"encoding plaintext");
-
     
+
         const sycl::host_accessor result{result_buf};
-        const sycl::host_accessor cipher_alphabet{cipher_alphabet_buf};
+        const sycl::host_accessor cipher_alphabet_acc{cipher_alphabet_buf};
         mark_time(timestamps,"Host data access");
 
 
@@ -134,8 +126,8 @@ int main(const int argc, const char *const argv[])
         mark_time(timestamps,"Output");
     }
     mark_time(timestamps, "DONE");
-    spdlog::info("all done for now");
 
+    spdlog::info("all done for now");
     print_timestamps(timestamps, perf_output, device_name);
     return 0;
 }

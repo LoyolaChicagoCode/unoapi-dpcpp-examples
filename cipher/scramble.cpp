@@ -3,7 +3,7 @@
 #include <list>
 #include <vector>
 
-std::vector<char> scramble(const std::string& key, const int key_size, const std::string& msg, const int msg_size, const int ascii_a, const int range)
+std::vector<char> scramble(const std::string& key, const int key_size, const int ascii_a, const int range)
 
 {
     // TODO: I need to check for duplicate characters and remove them from key.
