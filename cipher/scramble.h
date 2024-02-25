@@ -4,10 +4,17 @@
 #include <sycl/sycl.hpp>
 
 std::vector<char> scramble(
-	const std::string& key,
-	const int key_size,
-	const int ascii_a,
-	const int range
+	std::string keyword,
+	const int character_base,
+	const int character_range
 );
+
+std::vector<char> unscramble(
+	std::string keyword,
+	const int character_base,
+	const int character_range
+);
+
+void remove_duplicates(std::string& this_keyword);
 
 #endif
