@@ -17,7 +17,7 @@ int main(const int argc, const char *const argv[])
 {
     // main declarations begin
     std::string msg{"abcdefghijklmnopqrstuvwxyz"};
-    std::string key{"Cyndy"};
+    std::string key{"Cyndy!"};
     std::vector<char> substitution_alphabet;
     std::string perf_output;
     bool run_sequentially{false};
@@ -52,7 +52,7 @@ int main(const int argc, const char *const argv[])
     
     // file takes precendence over inline
     if (input_file_path.size() > 0) {
-        msg = read_from_binary(input_file_path);
+        read_from_binary(msg, input_file_path);
     }
 
     // main domain setup begin
@@ -77,20 +77,20 @@ int main(const int argc, const char *const argv[])
     // run sequential begin
     if (run_sequentially) {
         device_name = "sequential";
-	    std::vector<char> result(msg_size);
+        std::vector<char> result(msg_size);
         mark_time(timestamps, "memmory allocation");
 
-	    spdlog::info("starting sequential encoding");
-	    for (int i = 0; i < msg_size; i++) {
-	        result[i] = substitution_alphabet[msg[i] - character_base];
-	    }
-	    mark_time(timestamps,"encoding plaintext");
+        spdlog::info("starting sequential encoding");
+        for (int i = 0; i < msg_size; i++) {
+            result[i] = substitution_alphabet[msg[i] - character_base];
+        }
+        mark_time(timestamps,"encoding plaintext");
         if (output_file_path.size() > 0) {
             spdlog::info("starting to write result to output file");
             write_to_binary(result, output_file_path);
         }
         mark_time(timestamps,"writing to file");
-	    spdlog::info("results should be available now");
+        spdlog::info("results should be available now");
     }
     // run sequential end
 
@@ -123,7 +123,6 @@ int main(const int argc, const char *const argv[])
         const sycl::host_accessor result{result_buf};
         mark_time(timestamps,"Host data access");
         
-        spdlog::info("printing plaintext, key, ciphertext");
         mark_time(timestamps,"Output");
         if (output_file_path.size() > 0) {
             write_to_binary(result, output_file_path);

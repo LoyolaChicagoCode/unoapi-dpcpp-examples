@@ -1,9 +1,9 @@
-#include "scramble.h"
-#include <string>
 #include <algorithm>
 #include <list>
 #include <vector>
 #include <set>
+
+#include "scramble.h"
 
 // method returns a vector used to transform plaintext -> ciphertext
 std::vector<char> scramble(std::string keyword, const int character_base, const int character_range)
@@ -62,19 +62,19 @@ std::vector<char> unscramble(std::string keyword, const int character_base, cons
 }
 
 // helper method to remove duplicates from a string
-void remove_duplicates(std::string& this_keyword)
+void remove_duplicates(std::string& keyword)
 {
     std::set<char> unique_characters;
-    this_keyword.erase(
+    keyword.erase(
         std::remove_if(
-            this_keyword.begin(),
-            this_keyword.end(),
+            keyword.begin(),
+            keyword.end(),
             [&unique_characters] (char i) {
                 if (unique_characters.count(i)) { return true; }
                 unique_characters.insert(i);
                 return false;
             }
         ),
-        this_keyword.end()
+        keyword.end()
     );
 }
