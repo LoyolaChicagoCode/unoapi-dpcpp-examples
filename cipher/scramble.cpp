@@ -2,6 +2,7 @@
 #include <list>
 #include <vector>
 #include <set>
+#include <string>
 
 #include "scramble.h"
 
