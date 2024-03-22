@@ -1,13 +1,13 @@
 #ifndef SCRAMBLE_H
 #define SCRAMBLE_H
 
-std::vector<char> scramble(
+std::vector<std::byte> scramble(
     std::string keyword,
     const int character_base,
     const int character_range
 );
 
-std::vector<char> unscramble(
+std::vector<std::byte> unscramble(
     std::string keyword,
     const int character_base,
     const int character_range

@@ -16,9 +16,10 @@
 int main(const int argc, const char *const argv[])
 {
     // main declarations begin
-    std::string msg{"abcdefghijklmnopqrstuvwxyz"};
+    std::vector<std::byte> msg{std::byte{1}};
+    //std::cout << "integer 97 cast to byte -> cast to char -> " << static_cast<char>(static_cast<std::byte>(97)) << std::endl;
     std::string key{"Cyndy!"};
-    std::vector<char> substitution_alphabet;
+    std::vector<std::byte> substitution_alphabet;
     std::string perf_output;
     bool run_sequentially{false};
     bool encode{false};
@@ -58,7 +59,7 @@ int main(const int argc, const char *const argv[])
     // main domain setup begin
     const auto msg_size = msg.size();
     const auto character_base{0};
-    const auto character_range{128};
+    const auto character_range{256};
     // main domain setup end
     
     
@@ -69,6 +70,7 @@ int main(const int argc, const char *const argv[])
         substitution_alphabet = scramble(key, character_base, character_range);
     }
     else {
+        //add back after scramble is working w/ std::vector<std::byte>
         substitution_alphabet = unscramble(key, character_base, character_range);
     }
     mark_time(timestamps, "initializing alphabet vector");
@@ -77,12 +79,12 @@ int main(const int argc, const char *const argv[])
     // run sequential begin
     if (run_sequentially) {
         device_name = "sequential";
-        std::vector<char> result(msg_size);
+        std::vector<std::byte> result(msg_size);
         mark_time(timestamps, "memmory allocation");
 
         spdlog::info("starting sequential encoding");
         for (int i = 0; i < msg_size; i++) {
-            result[i] = substitution_alphabet[msg[i] - character_base];
+            result[i] = substitution_alphabet[static_cast<int>(msg[i]) - character_base];
         }
         mark_time(timestamps,"encoding plaintext");
         if (output_file_path.size() > 0) {
@@ -95,9 +97,9 @@ int main(const int argc, const char *const argv[])
     // run sequential end
 
     else {
-        sycl::buffer<char> msg_buf{msg.data(), sycl::range<1>{msg_size}};
-        sycl::buffer<char> substitution_alphabet_buf{substitution_alphabet.data(), sycl::range<1>{character_range}};
-        sycl::buffer<char> result_buf{sycl::range<1>{msg_size}};
+        sycl::buffer<std::byte> msg_buf{msg.data(), sycl::range<1>{msg_size}};
+        sycl::buffer<std::byte> substitution_alphabet_buf{substitution_alphabet.data(), sycl::range<1>{character_range}};
+        sycl::buffer<std::byte> result_buf{sycl::range<1>{msg_size}};
         mark_time(timestamps, "memmory allocation");
         spdlog::info("starting parallel encoding");
 
@@ -113,7 +115,7 @@ int main(const int argc, const char *const argv[])
             const sycl::accessor msg{msg_buf, h};
             const sycl::accessor result{result_buf, h};
             h.parallel_for(msg_size, [=](const auto & i) {
-                result[i] = substitution_alphabet[msg[i] - character_base];
+                result[i] = substitution_alphabet[static_cast<int>(msg[i]) - character_base];
             });
         });
         spdlog::info("done submitting to queue...waiting for results");

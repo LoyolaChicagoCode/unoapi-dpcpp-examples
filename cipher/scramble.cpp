@@ -7,56 +7,70 @@
 #include "scramble.h"
 
 // method returns a vector used to transform plaintext -> ciphertext
-std::vector<char> scramble(std::string keyword, const int character_base, const int character_range)
+std::vector<std::byte> scramble(std::string keyword, const int character_base, const int character_range)
 {
     // setting up keyword domain
     remove_duplicates(keyword);
     const auto keyword_size = keyword.size();
 
     // declaring plaintext and ciphertext alphabets
-    std::list<char> plaintext_alphabet;
-    std::vector<char> ciphertext_alphabet;
+    std::list<std::byte> plaintext_alphabet;
+    std::vector<std::byte> ciphertext_alphabet;
     
     // initializing plaintext_alphabet
     for (int i = character_base; i < (character_range + character_base); i++) {
-        char character = char(i);
-        plaintext_alphabet.push_back(character);
+        plaintext_alphabet.push_back(static_cast<std::byte>(i));
+        //char character = i;
+        //plaintext_alphabet.push_back(character);
     }
     
     // writing keyword characters to ciphertext_alphabet and removing keyword characters from plaintext_alphabet
     for (int i = 0; i < keyword_size; i++) {
-        ciphertext_alphabet.push_back(keyword[i]);
-        plaintext_alphabet.remove(keyword[i]);
+        ciphertext_alphabet.push_back(static_cast<std::byte>(keyword[i]));
+        plaintext_alphabet.remove(static_cast<std::byte>(keyword[i]));
+        //ciphertext_alphabet.push_back(keyword[i]);
+        //plaintext_alphabet.remove(keyword[i]);
     }
     
     // writing remaining characters from plaintext_alphabet to ciphertext_alphabet
     for (int i = 0; i < (character_range - keyword_size); i++) {
-        char character = plaintext_alphabet.front();
-        ciphertext_alphabet.push_back(character);
+        std::byte byte = plaintext_alphabet.front();
+        ciphertext_alphabet.push_back(byte);
         plaintext_alphabet.pop_front();
+        //char character = plaintext_alphabet.front();
+        //ciphertext_alphabet.push_back(character);
+        //plaintext_alphabet.pop_front();
     }     
     return ciphertext_alphabet;
 }
 
+// convert this after i get scramble working...
 // method returns a vector used to transform ciphertext -> plaintext
-std::vector<char> unscramble(std::string keyword, const int character_base, const int character_range)
+
+std::vector<std::byte> unscramble(std::string keyword, const int character_base, const int character_range)
 {
     remove_duplicates(keyword);
     const auto keyword_size = keyword.size();
     auto counter_key = 0;
     auto counter_not = keyword_size;
-    char character;
-    std::vector<char> plaintext_alphabet;
+    //char character;
+    std::byte byte;
+    std::vector<std::byte> plaintext_alphabet;
 
     for (int i = character_base; i < (character_range + character_base); i++) {
-        char index_char = char(i);
-        if (keyword.find(index_char) == -1) {
-            character = char(counter_not++);
-            plaintext_alphabet.push_back(character);
+        std::byte index_byte = static_cast<std::byte>(i);
+        //char index_char = char(i);
+        if (keyword.find(static_cast<char>(index_byte)) == -1) {
+            byte = static_cast<std::byte>(counter_not++);
+            //character = char(counter_not++);
+            plaintext_alphabet.push_back(byte);
+            //plaintext_alphabet.push_back(character);
         }
         else {
-            character = char(counter_key++);
-            plaintext_alphabet.push_back(character);
+            byte = static_cast<std::byte>(counter_key++);
+            //character = char(counter_key++);
+            plaintext_alphabet.push_back(byte);
+            //plaintext_alphabet.push_back(character);
         }
     }
     return plaintext_alphabet;
