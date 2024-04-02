@@ -101,7 +101,7 @@ int main(const int argc, const char *const argv[])
     std::vector<std::byte> byte_map{decimal_end - decimal_begin};
     // main domain setup end
     
-    // initializing alphabet begin
+    // initializing byte_map begin
     spdlog::info("preparing byte map");
     if (encode) {
         byte_map = scramble(key, decimal_begin, decimal_end);
@@ -110,7 +110,7 @@ int main(const int argc, const char *const argv[])
         byte_map = unscramble(key, decimal_begin, decimal_end);
     }
     mark_time(timestamps, "initializing byte map vector");
-    // initializing alphabet end
+    // initializing byte_map end
     
     // run sequential begin
     if (run_sequentially) {
