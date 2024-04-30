@@ -1,16 +1,8 @@
 #include <sycl/sycl.hpp>
-#include <iostream>
-#include <limits>
-#include <chrono>
 #include <fstream>
-
-#define FMT_HEADER_ONLY
 #include <fmt/format.h>
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
-
-#include <stdio.h>
-#include <math.h>
 
 int populate_matrix(std::string & filename, sycl::buffer<int, 2> & C_buf)
 {
