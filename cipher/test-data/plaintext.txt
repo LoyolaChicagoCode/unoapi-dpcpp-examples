@@ -1,0 +1,6 @@
+This is test data!
+
+Add the path to this file to /cipher/test.cpp const::std plaintext_filepath.
+Add the path to the ciphertext.txt file located in the test-data directory to /cipher/test.cpp const::std ciphertext_filepath.
+
+:)
