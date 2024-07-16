@@ -50,21 +50,16 @@ constexpr int P = m_size / 2;
 /**
  * Perform matrix multiplication on host to verify results from device.
  */
-int VerifyResult(float (*c_back)[P], steady_clock::time_point zero);
+int VerifyResult(const host_accessor<float, 2> c_back, steady_clock::time_point zero);
 
 int main() {
+  int result;
 
   fmt::print("what up - this is fmt\n");
   spdlog::info("what up - this is spdlog");
 
   steady_clock::time_point zero;
 
-  // Host memory buffer that device will write data back before destruction.
-  float(*c_back)[P] = new float[M][P];
-
-  // Intialize c_back
-  for (int i = 0; i < M; i++)
-    for (int j = 0; j < P; j++) c_back[i][j] = 0.0f;
 
   // Initialize the device queue with the default selector. The device queue is
   // used to enqueue kernels. It encapsulates all states needed for execution.
@@ -73,11 +68,12 @@ int main() {
 
     cout << "Device: " << q.get_device().get_info<info::device::name>() << "\n";
 
-    // Create 2D buffers for matrices, buffer c is bound with host memory c_back
+    // Create 2D buffers for matrices
 
     buffer<float, 2> a_buf(range(M, N));
     buffer<float, 2> b_buf(range(N, P));
-    buffer c_buf(reinterpret_cast<float *>(c_back), range(M, P));
+    buffer<float, 2> b_buf_t(range(P, N));
+    buffer<float, 2> c_buf(range(M, P));
 
     cout << "Problem size: c(" << M << "," << P << ") = a(" << M << "," << N
          << ") * b(" << N << "," << P << ")\n";
@@ -113,12 +109,25 @@ int main() {
         b[index] = index[0] + 1.0f;
       });
     });
+      
+    //  b transpose-> b_t
+    q.submit([&](auto &h) {
+      accessor b(b_buf, h, read_only);
+      accessor b_t(b_buf_t, h, write_only);
+    
+      h.parallel_for(range(M, N), [=](auto index) {
+        int row = index[0];
+        int col = index[1];
+        b_t[row][col] = b[col][row];
+      });
+    });
 
     // Submit command group to queue to multiply matrices: c = a * b
     q.submit([&](auto &h) {
       // Read from a and b, write to c
+      // Update using b_t: to multiply a[row] by b_t[row] to calculate c[index].
       accessor a(a_buf, h, read_only);
-      accessor b(b_buf, h, read_only);
+      accessor b_t(b_buf_t, h, read_only);
       accessor c(c_buf, h, write_only);
 
       int width_a = a_buf.get_range()[1];
@@ -127,28 +136,30 @@ int main() {
       h.parallel_for(range(M, P), [=](auto index) {
         // Get global position in Y direction.
         int row = index[0];
-        // Get global position in X direction.
-        int col = index[1];
+        // Get global position in X direction. (using matrix b_t, no need for global pos of col)
+        //int col = index[1];
 
         float sum = 0.0f;
 
         // Compute the result of one element of c
         for (int i = 0; i < width_a; i++) {
-          sum += a[row][i] * b[i][col];
+          sum += a[row][i] * b_t[row][i];
         }
 
         c[index] = sum;
       });
     });
+      
+    // verify result in scope of c_buf
+    const host_accessor c_back{c_buf};
+    result = VerifyResult(c_back, zero);
+      
   } catch (sycl::exception const &e) {
     cout << "An exception is caught while multiplying matrices.\n";
     terminate();
   }
 
-  int result;
   cout << "Result of matrix multiplication using DPC++: ";
-  result = VerifyResult(c_back, zero);
-  delete[] c_back;
 
   return result;
 }
@@ -157,7 +168,7 @@ bool ValueSame(float a, float b) {
   return fabs(a - b) < numeric_limits<float>::epsilon();
 }
 
-int VerifyResult(float (*c_back)[P], const steady_clock::time_point zero) {
+int VerifyResult(const host_accessor<float, 2> c_back, const steady_clock::time_point zero) {
 
   auto now = steady_clock::now();
   fmt::print("time to compute results in ms: {}\n", duration_cast<milliseconds>(now - zero).count());
