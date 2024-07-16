@@ -5,7 +5,7 @@
 
 #include <CLI/CLI.hpp>
 #include <fmt/format.h>
-#include <scn/scn.h>
+//#include <scn/scn.h>
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 
