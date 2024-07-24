@@ -10,12 +10,6 @@
 #include "plf_nanotimer.h"
 #include "graph.h"
 
-// This function is meant to populate a two-dimensional vector with adjacency matrix values.
-// I had the idea to use a host_accessor to perform the Warshall procedure sequentially
-// on the CPU. I came across the article referenced below outlining why this might be a
-// bad idea. This function is the result.
-// https://www.intel.com/content/www/us/en/docs/oneapi/optimization-guide-gpu/2024-2/performance-impact-of-usm-and-buffers.html#:~:text=The%20same%20is,should%20be%20avoided
-
 int main(const int argc, const char *const argv[])
 {
     // Main declarations.
