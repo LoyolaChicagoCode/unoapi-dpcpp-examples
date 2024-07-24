@@ -45,6 +45,8 @@ int main(const int argc, const char *const argv[])
     //app.add_flag("-p, --print", print);
     CLI11_PARSE(app, argc, argv);
     
+    plf::nanotimer time_total;
+    time_total.start();
     // Init parallel and sequential result.
     spdlog::info("Initializing result structures");
     sycl::buffer<int, 2> parallel_result(sycl::range(num_vertices, num_vertices));
@@ -95,7 +97,6 @@ int main(const int argc, const char *const argv[])
         
         // Loading linear adjacency matrix into buffer.
         sycl::buffer<int> C_buf(linear_adj_matrix.data(), sycl::range<1>{linear_adj_matrix.size()});
-        sycl::buffer<int> flag_buf{sycl::range<1>{1}};
         
         // sycl queue creation:
         spdlog::info("setting up queue");
@@ -143,9 +144,9 @@ int main(const int argc, const char *const argv[])
                 });
             });
         }
-        // Access flag buff to initiate work on device.
-        spdlog::info("preparing flag access");
-        const sycl::host_accessor flag{flag_buf};
+        // Init work on device.
+        spdlog::info("Preparing host access");
+        const sycl::host_accessor host_access{parallel_result};
         time_result = time_parallel.get_elapsed_ns();
         mark_time(timestamps, time_result, "Run parallel");
         spdlog::info("Run parallel end");
@@ -172,6 +173,8 @@ int main(const int argc, const char *const argv[])
         spdlog::info("Results match!");
         spdlog::info("Comparing results end");
     }
+    time_result = time_total.get_elapsed_ns();
+    mark_time(timestamps, time_result, "Time Total");
     print_timestamps(timestamps);
     spdlog::info("all done");
     return 0;
