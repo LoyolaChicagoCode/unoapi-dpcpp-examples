@@ -4,6 +4,18 @@
 #include <vector>
 #include <iostream>
 
+int generate_simple_directed_linear(
+    std::vector<int> & graph,
+    int edges,
+    int vertices
+    );
+
+int generate_simple_directed_linear(
+    int *graph,
+    int edges,
+    int vertices
+    );
+
 int generate_simple_directed_graph(
     std::vector<std::vector<int>> & adj_matrix,
     int num_edge,
