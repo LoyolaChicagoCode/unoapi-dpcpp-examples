@@ -52,7 +52,7 @@ int generate_simple_directed_linear(std::vector<int> & graph, int edges, int ver
         graph[vertex_one * vertices + vertex_two] = 1;
     }
     
-    return 0;
+    return 1;
 }
 
 // Generate directed graph provided pointer.
@@ -98,7 +98,7 @@ int generate_simple_directed_linear(int *graph, int edges, int vertices)
         graph[vertex_one * vertices + vertex_two] = 1;
     }
     
-    return 0;
+    return 1;
 }
 
 
@@ -115,7 +115,7 @@ int generate_simple_directed_graph(std::vector<std::vector<int>> & adj_matrix, i
     // Maximum number of edges = n x (n - 1)
     if (num_edge > num_vertex * (num_vertex - 1)) {
         std::cout << "Too many edges." << std::endl;
-        return 1;
+        return -1;
     }
 
     // Resizing adj_matrix (num_vertex by num_vertex) is now done in main.
@@ -157,7 +157,7 @@ int generate_simple_directed_graph(std::vector<std::vector<int>> & adj_matrix, i
         adj_matrix[vertex_one][vertex_two] = 1;
     }
     
-    return 0;
+    return 1;
 }
 
 // This function linearizes parameter adj_matrix and stores in linear_adj_matrix.
